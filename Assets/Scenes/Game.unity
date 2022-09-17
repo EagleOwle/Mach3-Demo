@@ -735,10 +735,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a21b1ec50bcecf4fb868aa7a13eafe3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boardSize: {x: 6, y: 9}
+  boardSize: {x: 7, y: 10}
   screenOffset: {x: 0.5, y: 0.5}
   itemSize: 1
-  itemPrefab: {fileID: -7058696850342491965, guid: d2ff6d169a1870743969841fb8aa911d, type: 3}
+  itemPrefab: {fileID: 8348780820639340964, guid: d2ff6d169a1870743969841fb8aa911d, type: 3}
 --- !u!1 &1402046355
 GameObject:
   m_ObjectHideFlags: 0

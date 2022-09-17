@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Tap : MonoBehaviour
 {
-    [SerializeField] private Item item;
+    [SerializeField] private Cell item;
 
     private void OnMouseDown()
     {

@@ -23,7 +23,7 @@ public class Neighbor
     }
 
     public Side side;
-    public Item item;
+    public Cell cell;
 }
 
 public struct SideValue
