@@ -1,40 +1,54 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public interface ITapListener
+public class Board : ITapListener
 {
-    void OnTap(Cell item);
-}
-
-public class Board : MonoBehaviour, ITapListener
-{
-    [SerializeField] private Vector2 boardSize;
-    [SerializeField] private Vector2 screenOffset;
-    [SerializeField] private float itemSize;
-    [SerializeField] private Item itemPrefab;
-
+    private BoardSetting boardSetting;
     private Cell[,] cells;
     private List<Cell> lastLine;
     private Cell currentSelect;
 
-    private void Start()
+    public void Initialise(BoardSetting boardSetting)
     {
-        cells = new Cell[(int)boardSize.x, (int)boardSize.y];
-
+        this.boardSetting = boardSetting;
+        cells = new Cell[(int)this.boardSetting.boardSize.x, (int)this.boardSetting.boardSize.y];
         lastLine = new List<Cell>();
 
+        StateMachine.actionChangeState += ChangeState;
 
-        for (int iy = 0; iy < boardSize.y; iy++)
+        CreateCells();
+        FindNeiborth();
+
+        SpawnBlockItem();
+        SpawnFirstItem(out bool onSpawn);
+    }
+
+    private void ChangeState(State obj)
+    {
+        if (StateMachine.currentState is CheckState)
         {
-            for (int ix = 0; ix < boardSize.x; ix++)
+            CheckLine();
+        }
+    }
+
+    private void CheckLine()
+    {
+
+    }
+
+    private void CreateCells()
+    {
+        for (int iy = 0; iy < boardSetting.boardSize.y; iy++)
+        {
+            for (int ix = 0; ix < boardSetting.boardSize.x; ix++)
             {
                 Cell cell = new Cell();
-                cell.Initialise(this, new Vector2(ix,iy));
-                cell.worldPosition = WorldPosition(new Vector2(ix, iy));
+                cell.Initialise(this, new Vector2(ix, iy), WorldPosition(new Vector2(ix, iy)));
+                
                 cells[ix, iy] = cell;
 
-                if(iy == cells.GetLength(1)-2)
+                if (iy == cells.GetLength(1) - 2)
                 {
                     if (ix > 0 && ix < cells.GetLength(0) - 1)
                     {
@@ -53,10 +67,13 @@ public class Board : MonoBehaviour, ITapListener
 
             }
         }
+    }
 
-        for (int ix = 0; ix < boardSize.x; ix++)
+    private void FindNeiborth()
+    {
+        for (int ix = 0; ix < boardSetting.boardSize.x; ix++)
         {
-            for (int iy = 0; iy < boardSize.y; iy++)
+            for (int iy = 0; iy < boardSetting.boardSize.y; iy++)
             {
                 Cell item = cells[ix, iy];
                 foreach (var cell in item.neighbors)
@@ -66,73 +83,77 @@ public class Board : MonoBehaviour, ITapListener
             }
         }
 
-        SpawnFirstItem();
-        StartCoroutine(GoDown());
     }
 
-    private void SpawnFirstItem()
+    private void SpawnBlockItem()
     {
-        foreach (var cell in lastLine)
+        for (int ix = 0; ix < boardSetting.boardSize.x; ix++)
         {
-            if (cell.item == null)
+            for (int iy = 0; iy < boardSetting.boardSize.y; iy++)
             {
-                Vector3 worldPosition = WorldPosition(cell.arrayPosition);
-                Item tmp = Instantiate(itemPrefab, worldPosition, Quaternion.identity, transform);
-                cell.item = tmp;
-            }
-        }
-    }
-
-    private IEnumerator GoDown()
-    {
-        int y = 0;
-
-        while (y < boardSize.y)
-        {
-            for (int x = 0; x < boardSize.x; x++)
-            {
-                if (cells[x, y].type == CellType.Block)
-                    continue;
-
-                if (cells[x, y].item == null)
-                    continue;
-
-                Neighbor neighbor = cells[x, y].GetNeighbor(Neighbor.Side.South);
-
-                if (neighbor.cell.type == CellType.Block)
-                    continue;
-
-                if (neighbor.cell.item == null)
+                Cell cell = cells[ix, iy];
+                
+                if(cell.type == CellType.Block)
                 {
-                    neighbor.cell.SetItem(cells[x, y].item);
-                    cells[x, y].item = null;
+                    Vector3 worldPosition = WorldPosition(cell.arrayPosition);
+                    Item tmp = GameObject.Instantiate(PrefabStore.Instance.itemPrefab, worldPosition, Quaternion.identity);
+                    tmp.SetType(CellType.Block);
                 }
             }
-
-            Debug.Log("GoDown y= " + y);
-            y++;
-            
-            yield return new WaitForSeconds(0.1f);
         }
+    }
 
-        StartCoroutine(GoDown());
+    public void SpawnFirstItem(out bool onSpawn)
+    {
+        onSpawn = false;
+        foreach (var cell in lastLine)
+        {
+            if (cell.Item == null)
+            {
+                Vector3 worldPosition = WorldPosition(cell.arrayPosition);
+                Item tmp = GameObject.Instantiate(PrefabStore.Instance.itemPrefab, worldPosition, Quaternion.identity);
+                tmp.SetRandomByType(CellType.Game);
+                cell.Item = tmp;
+                onSpawn = true;
+            }
+        }
     }
 
     private Vector2 WorldPosition(Vector2 arrayPosition)
     {
-        float x = (arrayPosition.x * itemSize) - boardSize.x / 2 + screenOffset.x;
-        float y = (arrayPosition.y * itemSize) - boardSize.y / 2 + screenOffset.y;
+        float x = (arrayPosition.x * boardSetting.itemSize) - boardSetting.boardSize.x / 2 + boardSetting.screenOffset.x;
+        float y = (arrayPosition.y * boardSetting.itemSize) - boardSetting.boardSize.y / 2 + boardSetting.screenOffset.y;
         return new Vector2(x, y);
     }
 
-    public void OnTap(Cell item)
+    public void SelectCell(Cell cell)
     {
-        if (currentSelect != null && currentSelect != item)
+        if (currentSelect != null)
         {
-            currentSelect.Deselect();
+            if (currentSelect != cell)
+            {
+                if (currentSelect.CheckNeigbors(cell))
+                {
+                    currentSelect.Deselect();
+                    currentSelect = null;
+                    StateMachine.SetState<CheckState>();
+                }
+                else
+                {
+                    currentSelect.Deselect();
+                    currentSelect = cell;
+                }
+            }
+            else
+            {
+                //currentSelect.Deselect();
+                //currentSelect = cell;
+            }
         }
-
-        currentSelect = item;
+        else
+        {
+            currentSelect = cell;
+        }
     }
 
     public void SetNeiborth(Neighbor neighbor, Vector2 position)
@@ -142,7 +163,7 @@ public class Board : MonoBehaviour, ITapListener
 
         switch (neighbor.side)
         {
-            case Neighbor.Side.North:
+            case Side.North:
 
                 if (x < cells.GetLength(0) && y + 1 < cells.GetLength(1))
                 {
@@ -152,7 +173,7 @@ public class Board : MonoBehaviour, ITapListener
                     }
                 }
                 break;
-            case Neighbor.Side.EastNorth:
+            case Side.EastNorth:
                 if (x + 1 < cells.GetLength(0) && y + 1 < cells.GetLength(1))
                 {
                     if (cells[x + 1, y + 1] != null)
@@ -161,7 +182,7 @@ public class Board : MonoBehaviour, ITapListener
                     }
                 }
                 break;
-            case Neighbor.Side.East:
+            case Side.East:
                 if (x + 1 < cells.GetLength(0) && y < cells.GetLength(1))
                 {
                     if (cells[x + 1, y] != null)
@@ -170,7 +191,7 @@ public class Board : MonoBehaviour, ITapListener
                     }
                 }
                 break;
-            case Neighbor.Side.EastSouth:
+            case Side.EastSouth:
                 if (y > 0)
                 {
                     if (x + 1 < cells.GetLength(0) && y - 1 < cells.GetLength(1))
@@ -182,7 +203,7 @@ public class Board : MonoBehaviour, ITapListener
                     }
                 }
                 break;
-            case Neighbor.Side.South:
+            case Side.South:
                 if (y > 0)
                 {
                     if (x < cells.GetLength(0) && y - 1 < cells.GetLength(1))
@@ -194,7 +215,7 @@ public class Board : MonoBehaviour, ITapListener
                     }
                 }
                 break;
-            case Neighbor.Side.WestSouth:
+            case Side.WestSouth:
                 if (x > 0 && y > 0)
                 {
                     if (x - 1 < cells.GetLength(0) && y - 1 < cells.GetLength(1))
@@ -206,7 +227,7 @@ public class Board : MonoBehaviour, ITapListener
                     }
                 }
                 break;
-            case Neighbor.Side.West:
+            case Side.West:
                 if (x > 0)
                 {
                     if (x - 1 < cells.GetLength(0) && y < cells.GetLength(1))
@@ -219,7 +240,7 @@ public class Board : MonoBehaviour, ITapListener
                 }
 
                 break;
-            case Neighbor.Side.WestNorth:
+            case Side.WestNorth:
                 if (x > 0)
                 {
                     if (x - 1 < cells.GetLength(0) && y + 1 < cells.GetLength(1))
@@ -231,6 +252,29 @@ public class Board : MonoBehaviour, ITapListener
                     }
                 }
                 break;
+        }
+    }
+
+    public void GoDown(int y)
+    {
+        for (int x = 0; x < boardSetting.boardSize.x; x++)
+        {
+            if (cells[x, y].type == CellType.Block)
+                continue;
+
+            if (cells[x, y].Item == null)
+                continue;
+
+            Neighbor neighbor = cells[x, y].GetNeighbor(Side.South);
+
+            if (neighbor.cell.type == CellType.Block)
+                continue;
+
+            if (neighbor.cell.Item == null)
+            {
+                neighbor.cell.Item = (cells[x, y].Item);
+                cells[x, y].Item = null;
+            }
         }
     }
 
@@ -256,7 +300,7 @@ public class Board : MonoBehaviour, ITapListener
                     Vector3 worldPosition = WorldPosition(new Vector2(ix, iy));
                     Gizmos.DrawWireCube(worldPosition, new Vector3(1, 1, 1));
 
-                    if (cells[ix, iy].item != null)
+                    if (cells[ix, iy].Item != null)
                     {
                         Gizmos.DrawWireSphere(worldPosition, 0.4f);
                     }

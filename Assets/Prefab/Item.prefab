@@ -45,12 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dce0fdb207369d0469885a08723963ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sprites:
-  - {fileID: 21300000, guid: 52a05ef40775ce04391e3ccf341bdfb7, type: 3}
-  - {fileID: 21300000, guid: b4c69ce983a01e34ab77a379df3f04bf, type: 3}
-  - {fileID: 21300000, guid: 684bf4b896281f442bcb644c3203c5c1, type: 3}
-  - {fileID: 21300000, guid: 3d7226a7f092a3a469cca7f4a0dd55e2, type: 3}
   spriteRenderer: {fileID: 8075141219413331093}
+  speedMove: 5
 --- !u!1 &9013148481583503713
 GameObject:
   m_ObjectHideFlags: 0
@@ -61,7 +57,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5437892690044247815}
   - component: {fileID: 8075141219413331093}
-  - component: {fileID: 688862082130383235}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -124,8 +119,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 52a05ef40775ce04391e3ccf341bdfb7, type: 3}
+  m_SortingOrder: 1
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -133,32 +128,6 @@ SpriteRenderer:
   m_Size: {x: 0.89, y: 0.89}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &688862082130383235
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9013148481583503713}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.89, y: 0.89}
-    newSize: {x: 0.89, y: 0.89}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0

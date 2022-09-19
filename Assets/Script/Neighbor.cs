@@ -10,23 +10,7 @@ public class Neighbor
         this.side = side;
     }
 
-    public enum Side
-    {
-        North,
-        EastNorth,
-        East,
-        EastSouth,
-        South,
-        WestSouth,
-        West,
-        WestNorth
-    }
-
     public Side side;
     public Cell cell;
 }
 
-public struct SideValue
-{
-
-}

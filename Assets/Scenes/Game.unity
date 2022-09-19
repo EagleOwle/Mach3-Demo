@@ -732,13 +732,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1088307228}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a21b1ec50bcecf4fb868aa7a13eafe3, type: 3}
+  m_Script: {fileID: 11500000, guid: fc0caa112704abe41b07d6a72b14db3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boardSize: {x: 7, y: 10}
-  screenOffset: {x: 0.5, y: 0.5}
-  itemSize: 1
-  itemPrefab: {fileID: 8348780820639340964, guid: d2ff6d169a1870743969841fb8aa911d, type: 3}
+  boardSetting:
+    boardSize: {x: 7, y: 11}
+    screenOffset: {x: 0.5, y: 0.5}
+    itemSize: 1
+  speedDown: 5
+  debugCurrentGameState: 
 --- !u!1 &1402046355
 GameObject:
   m_ObjectHideFlags: 0

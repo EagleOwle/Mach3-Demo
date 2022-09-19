@@ -4,10 +4,18 @@ using UnityEngine;
 
 public class Tap : MonoBehaviour
 {
-    [SerializeField] private Cell item;
+    private Cell cell;
+
+    public void Initialise(Cell cell)
+    {
+        this.cell = cell;
+    }
 
     private void OnMouseDown()
     {
-        item.Select();
+        if (StateMachine.currentState is InputState)
+        {
+            cell.Select();
+        }
     }
 }

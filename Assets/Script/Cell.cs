@@ -1,65 +1,95 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
-public enum CellType
-{
-    Block,
-    Game
-}
 
 public class Cell
 {
-    public Action<Cell> actionOnTap;
     public Neighbor[] neighbors;
     public Vector2 arrayPosition;
     public Vector2 worldPosition;
     public CellType type;
-    public Item item;
-    private bool isSelect = false;
-
-    public void SetItem(Item item)
+    private Item item;
+    public Item Item
     {
-        this.item = item;
-        item.transform.position = worldPosition;
+        get
+        {
+            return item;
+        }
+        set
+        {
+            item = value;
+
+            if (item != null)
+            {
+                item.Deselect();
+                item.GoToPosition(worldPosition);
+            }
+        }
     }
 
-    public Neighbor GetNeighbor(Neighbor.Side side)
+    private ITapListener tapListener;
+
+    public Neighbor GetNeighbor(Side side)
     {
         return neighbors[(int)side];
     }
 
-    public void Initialise(ITapListener tapListener, Vector2 arrayPosition)
+    public void Initialise(ITapListener tapListener, Vector2 arrayPosition, Vector2 worldPosition)
     {
-        actionOnTap += tapListener.OnTap;
+        this.tapListener = tapListener;
         this.arrayPosition = arrayPosition;
+        this.worldPosition = worldPosition;
+        //Debug.Log("ArrayPosition = " + arrayPosition);
         neighbors = new Neighbor[]
         {
-            new Neighbor(Neighbor.Side.North),
-            new Neighbor(Neighbor.Side.EastNorth),
-            new Neighbor(Neighbor.Side.East),
-            new Neighbor(Neighbor.Side.EastSouth),
-            new Neighbor(Neighbor.Side.South),
-            new Neighbor(Neighbor.Side.WestSouth),
-            new Neighbor(Neighbor.Side.West),
-            new Neighbor(Neighbor.Side.WestNorth)
+            new Neighbor(Side.North),
+            new Neighbor(Side.EastNorth),
+            new Neighbor(Side.East),
+            new Neighbor(Side.EastSouth),
+            new Neighbor(Side.South),
+            new Neighbor(Side.WestSouth),
+            new Neighbor(Side.West),
+            new Neighbor(Side.WestNorth)
         };
+
+        Tap tap = GameObject.Instantiate(PrefabStore.Instance.tapPrefab);
+        Transform board = GameObject.Find("Board").transform;
+        tap.transform.position = worldPosition;
+        tap.transform.SetParent(board);
+        tap.Initialise(this);
+
+    }
+
+    public bool CheckNeigbors(Cell cell)
+    {
+        foreach (var item in neighbors)
+        {
+            if(item.cell == cell)
+            {
+                Item nextItem = cell.Item;
+                cell.Item = Item;
+                Item = nextItem;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void Deselect()
     {
-        isSelect = false;
+        item.Deselect();
     }
 
     public void Select()
     {
-        if (isSelect == true) return;
-
-        isSelect = true;
-        actionOnTap.Invoke(this);
+        item.Select();
+        this.tapListener.SelectCell(this);
     }
 
-    
+    public void DestroyItem()
+    {
+        Item.SelfDestroy();
+        Item = null;
+    }
 
 }
