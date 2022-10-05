@@ -700,6 +700,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1088307229}
   - component: {fileID: 1088307230}
+  - component: {fileID: 1088307231}
+  - component: {fileID: 1088307232}
   m_Layer: 0
   m_Name: Board
   m_TagString: Untagged
@@ -739,8 +741,34 @@ MonoBehaviour:
     boardSize: {x: 7, y: 11}
     screenOffset: {x: 0.5, y: 0.5}
     itemSize: 1
+  board: {fileID: 1088307231}
   speedDown: 5
   debugCurrentGameState: 
+--- !u!114 &1088307231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088307228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a21b1ec50bcecf4fb868aa7a13eafe3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  findLine: {fileID: 1088307232}
+--- !u!114 &1088307232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088307228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e85e9604f21574e41a4793d283f7ab7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1402046355
 GameObject:
   m_ObjectHideFlags: 0

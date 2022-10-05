@@ -12,11 +12,11 @@ public static class StateMachine
     public static void InitBeheviors()
     {
         behaviorMap = new Dictionary<Type, State>();
-        behaviorMap[typeof(CheckState)] = new CheckState();
-        behaviorMap[typeof(PauseState)] = new PauseState();
-        behaviorMap[typeof(FallState)] = new FallState();
-        behaviorMap[typeof(TimerState)] = new TimerState();
-        behaviorMap[typeof(InputState)] = new InputState();
+        behaviorMap[typeof(StateFindLine)] = new StateFindLine();
+        behaviorMap[typeof(StatePause)] = new StatePause();
+        behaviorMap[typeof(StateFall)] = new StateFall();
+        behaviorMap[typeof(StateTimer)] = new StateTimer();
+        behaviorMap[typeof(StateInput)] = new StateInput();
     }
 
     public static void SetState<T>() where T : State
@@ -28,7 +28,7 @@ public static class StateMachine
 
     private static void SetDefaultState()
     {
-        currentState = GetState<PauseState>();
+        currentState = GetState<StatePause>();
         currentState.Enter();
     }
 

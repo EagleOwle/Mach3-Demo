@@ -1,5 +1,5 @@
 ﻿public enum CellType
 {
-    Block,
-    Game
+    Wall,
+    Field
 }

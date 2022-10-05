@@ -13,7 +13,7 @@ public class Tap : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (StateMachine.currentState is InputState)
+        if (StateMachine.currentState is StateInput)
         {
             cell.Select();
         }

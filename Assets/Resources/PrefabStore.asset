@@ -14,22 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemPrefab: {fileID: 8348780820639340964, guid: d2ff6d169a1870743969841fb8aa911d, type: 3}
   tapPrefab: {fileID: 6947839108641336623, guid: b05d9405d4760ff458ad10359fffc1cf, type: 3}
-  tiles:
-  - name: Gem Type2 Blue
-    sprite: {fileID: 21300000, guid: 52a05ef40775ce04391e3ccf341bdfb7, type: 3}
-    type: 1
-  - name: Gem Type2 Green
+  block: {fileID: 21300000, guid: 4a79e016b6f870d4a8aa38c71c4f9f62, type: 3}
+  itemSpecification:
+  - type: 1
+    sprite: {fileID: 21300000, guid: 684bf4b896281f442bcb644c3203c5c1, type: 3}
+  - type: 2
     sprite: {fileID: 21300000, guid: b2643c0fcdcb14147ab9246a2579dc62, type: 3}
-    type: 1
-  - name: Gem Type2 Purple
-    sprite: {fileID: 21300000, guid: 0f45137d6b2b9f0478493118ff9a120a, type: 3}
-    type: 1
-  - name: Gem Type2 Red
-    sprite: {fileID: 21300000, guid: a4d79547c2f58ee4b8a1b675e222f8ed, type: 3}
-    type: 1
-  - name: Gem Type2 Yellow
-    sprite: {fileID: 21300000, guid: eae2d2ccfd43dfb439651d1d63e4a19d, type: 3}
-    type: 1
-  - name: Gem Type4 Black
-    sprite: {fileID: 21300000, guid: 4a79e016b6f870d4a8aa38c71c4f9f62, type: 3}
-    type: 0
+  - type: 3
+    sprite: {fileID: 21300000, guid: 29e9a621a5717964ea5d7efcd6fc7b2a, type: 3}
+  - type: 4
+    sprite: {fileID: 21300000, guid: d4e6a0bb7a7cf95448e340034c9dc21a, type: 3}

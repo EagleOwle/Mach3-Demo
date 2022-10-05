@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class Board : ITapListener
+
+public class Board : MonoBehaviour, ITapListener
 {
+    [SerializeField]private FindLine findLine;
     private BoardSetting boardSetting;
     private Cell[,] cells;
     private List<Cell> lastLine;
-    private Cell currentSelect;
+    private Cell currentSelectedCell;
 
     public void Initialise(BoardSetting boardSetting)
     {
@@ -20,21 +22,16 @@ public class Board : ITapListener
         CreateCells();
         FindNeiborth();
 
-        SpawnBlockItem();
+        SpawnWallItem();
         SpawnFirstItem(out bool onSpawn);
     }
 
     private void ChangeState(State obj)
     {
-        if (StateMachine.currentState is CheckState)
+        if (StateMachine.currentState is StateFindLine)
         {
-            CheckLine();
+            findLine.CheckLine(cells);
         }
-    }
-
-    private void CheckLine()
-    {
-
     }
 
     private void CreateCells()
@@ -58,11 +55,11 @@ public class Board : ITapListener
 
                 if (ix == 0 || ix == cells.GetLength(0) - 1 || iy == 0 || iy == cells.GetLength(1) - 1)
                 {
-                    cell.type = CellType.Block;
+                    cell.type = CellType.Wall;
                 }
                 else
                 {
-                    cell.type = CellType.Game;
+                    cell.type = CellType.Field;
                 }
 
             }
@@ -85,7 +82,7 @@ public class Board : ITapListener
 
     }
 
-    private void SpawnBlockItem()
+    private void SpawnWallItem()
     {
         for (int ix = 0; ix < boardSetting.boardSize.x; ix++)
         {
@@ -93,11 +90,11 @@ public class Board : ITapListener
             {
                 Cell cell = cells[ix, iy];
                 
-                if(cell.type == CellType.Block)
+                if(cell.type == CellType.Wall)
                 {
                     Vector3 worldPosition = WorldPosition(cell.arrayPosition);
                     Item tmp = GameObject.Instantiate(PrefabStore.Instance.itemPrefab, worldPosition, Quaternion.identity);
-                    tmp.SetType(CellType.Block);
+                    tmp.SetType(ItemType.Block);
                 }
             }
         }
@@ -112,7 +109,7 @@ public class Board : ITapListener
             {
                 Vector3 worldPosition = WorldPosition(cell.arrayPosition);
                 Item tmp = GameObject.Instantiate(PrefabStore.Instance.itemPrefab, worldPosition, Quaternion.identity);
-                tmp.SetRandomByType(CellType.Game);
+                tmp.SetRandomItem();
                 cell.Item = tmp;
                 onSpawn = true;
             }
@@ -128,31 +125,26 @@ public class Board : ITapListener
 
     public void SelectCell(Cell cell)
     {
-        if (currentSelect != null)
+        if (currentSelectedCell != null)
         {
-            if (currentSelect != cell)
+            if (currentSelectedCell != cell)
             {
-                if (currentSelect.CheckNeigbors(cell))
+                if (currentSelectedCell.CheckNeigbors(cell))
                 {
-                    currentSelect.Deselect();
-                    currentSelect = null;
-                    StateMachine.SetState<CheckState>();
+                    currentSelectedCell.Deselect();
+                    currentSelectedCell = null;
+                    StateMachine.SetState<StateFindLine>();
                 }
                 else
                 {
-                    currentSelect.Deselect();
-                    currentSelect = cell;
+                    currentSelectedCell.Deselect();
+                    currentSelectedCell = cell;
                 }
-            }
-            else
-            {
-                //currentSelect.Deselect();
-                //currentSelect = cell;
             }
         }
         else
         {
-            currentSelect = cell;
+            currentSelectedCell = cell;
         }
     }
 
@@ -259,7 +251,7 @@ public class Board : ITapListener
     {
         for (int x = 0; x < boardSetting.boardSize.x; x++)
         {
-            if (cells[x, y].type == CellType.Block)
+            if (cells[x, y].type == CellType.Wall)
                 continue;
 
             if (cells[x, y].Item == null)
@@ -267,7 +259,7 @@ public class Board : ITapListener
 
             Neighbor neighbor = cells[x, y].GetNeighbor(Side.South);
 
-            if (neighbor.cell.type == CellType.Block)
+            if (neighbor.cell.type == CellType.Wall)
                 continue;
 
             if (neighbor.cell.Item == null)
@@ -288,7 +280,7 @@ public class Board : ITapListener
             {
                 if (cells[ix, iy] != null)
                 {
-                    if(cells[ix,iy].type == CellType.Block)
+                    if(cells[ix,iy].type == CellType.Wall)
                     {
                         Gizmos.color = Color.red;
                     }

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PauseState : State
+public class StatePause : State
 {
     public override void Enter()
     {

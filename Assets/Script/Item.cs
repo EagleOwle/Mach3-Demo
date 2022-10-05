@@ -15,15 +15,25 @@ public class Item : MonoBehaviour
     private bool onPosition = false;
     private Vector2 targetPosition;
 
+    private ItemType currentType;
+    public ItemType Type => currentType;
 
-    public void SetRandomByType(CellType type)
+    public void SetRandomItem()
     {
-        spriteRenderer.sprite = PrefabStore.Instance.GetRandomSpriteByType(type);
+        int type = UnityEngine.Random.Range(1, 5);
+        SetRandomByType((ItemType)type);
     }
 
-    public void SetType(CellType type)
+    public void SetRandomByType(ItemType type)
+    {
+        spriteRenderer.sprite = PrefabStore.Instance.GetRandomSpriteByType(type);
+        currentType = type;
+    }
+
+    public void SetType(ItemType type)
     {
         spriteRenderer.sprite = PrefabStore.Instance.GetSpriteByType(type);
+        currentType = type;
     }
 
     private IEnumerator Crossfade()

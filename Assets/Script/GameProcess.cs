@@ -11,12 +11,11 @@ public class GameProcess : MonoBehaviour
 
     private void Start()
     {
-        board = new Board();
         board.Initialise(boardSetting);
 
         StateMachine.InitBeheviors();
         StateMachine.actionChangeState += ChangeState;
-        StateMachine.SetState<FallState>();
+        StateMachine.SetState<StateFall>();
     }
 
     private IEnumerator GoDown()
@@ -31,7 +30,6 @@ public class GameProcess : MonoBehaviour
             yield return new WaitForSeconds(speedDown * Time.deltaTime);
         }
 
-        Debug.Log("End GoDown");
         board.SpawnFirstItem(out bool onSpawn);
 
         if (onSpawn)
@@ -40,7 +38,7 @@ public class GameProcess : MonoBehaviour
         }
         else
         {
-            StateMachine.SetState<InputState>();
+            StateMachine.SetState<StateFindLine>();
         }
     }
 
@@ -48,7 +46,7 @@ public class GameProcess : MonoBehaviour
     {
         debugCurrentGameState = obj.nameState;
 
-        if (StateMachine.currentState is FallState)
+        if (StateMachine.currentState is StateFall)
         {
             StartCoroutine(GoDown());
         }

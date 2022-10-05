@@ -19,15 +19,23 @@ public class PrefabStore : ScriptableObject
 
     public Item itemPrefab;
     public Tap tapPrefab;
-    public Tile[] tiles;
+    public Sprite block;
+    public ItemSpecification[] itemSpecification;
 
-    public Sprite GetSpriteByType(CellType type)
+    public Sprite GetSpriteByType(ItemType type)
     {
-        foreach (var item in tiles)
+        if (type == ItemType.Block)
         {
-            if(item.type == type)
+            return block;
+        }
+        else
+        {
+            foreach (var item in itemSpecification)
             {
-                return item.sprite;
+                if (item.type == type)
+                {
+                    return item.sprite;
+                }
             }
         }
 
@@ -35,11 +43,11 @@ public class PrefabStore : ScriptableObject
         return null;
     }
 
-    public Sprite GetRandomSpriteByType(CellType type)
+    public Sprite GetRandomSpriteByType(ItemType type)
     {
         List<Sprite> sprites = new List<Sprite>();
 
-        foreach (var item in tiles)
+        foreach (var item in itemSpecification)
         {
             if (item.type == type)
             {
@@ -56,17 +64,6 @@ public class PrefabStore : ScriptableObject
         {
             Debug.LogError("No tile by type in store" + type);
             return null;
-        }
-    }
-
-    private void OnValidate()
-    {
-        for (int i = 0; i < tiles.Length; i++)
-        {
-            if (tiles[i].sprite != null)
-            {
-                tiles[i].name = tiles[i].sprite.name;
-            }
         }
     }
 

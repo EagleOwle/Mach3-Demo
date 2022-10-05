@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class FallState : State
+public class StateFall : State
 {
     public override void Enter()
     {

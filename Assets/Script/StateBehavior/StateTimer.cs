@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CheckState : State
+public class StateTimer : State
 {
     public override void Enter()
     {
-        nameState = "Check";
+        nameState = "Timer";
     }
 
     public override void Exit()

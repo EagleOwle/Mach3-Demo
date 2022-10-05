@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class InputState : State
+public class StateInput : State
 {
     public override void Enter()
     {
