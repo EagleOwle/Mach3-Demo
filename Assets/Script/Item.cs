@@ -65,10 +65,15 @@ public class Item : MonoBehaviour
         isSelect = false;
     }
 
-    public void Select()
+    public void Select(bool autoDesselect = false)
     {
         isSelect = true;
         StartCoroutine(Crossfade());
+
+        if(autoDesselect)
+        {
+            Invoke(nameof(Deselect), 0.5f);
+        }
     }
 
     public void SelfDestroy()

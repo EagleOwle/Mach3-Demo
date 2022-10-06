@@ -92,4 +92,9 @@ public class Cell
         Item = null;
     }
 
+    public void ChangeItemType(ItemType type)
+    {
+        Item.SetType(type);
+    }
+
 }

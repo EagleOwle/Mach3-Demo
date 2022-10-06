@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class Board : MonoBehaviour, ITapListener
@@ -94,7 +95,7 @@ public class Board : MonoBehaviour, ITapListener
                 {
                     Vector3 worldPosition = WorldPosition(cell.arrayPosition);
                     Item tmp = GameObject.Instantiate(PrefabStore.Instance.itemPrefab, worldPosition, Quaternion.identity);
-                    tmp.SetType(ItemType.Block);
+                    tmp.SetType(ItemType.None);
                 }
             }
         }
@@ -278,24 +279,17 @@ public class Board : MonoBehaviour, ITapListener
         {
             for (int iy = 0; iy < cells.GetLength(1); iy++)
             {
-                if (cells[ix, iy] != null)
+                Vector3 worldPosition = WorldPosition(new Vector2(ix, iy));
+                GUI.color = Color.black;
+                Handles.Label(worldPosition + Vector3.up * 0.2f, ix + "/ " + iy);
+
+                if (cells[ix, iy].Item != null)
                 {
-                    if(cells[ix,iy].type == CellType.Wall)
-                    {
-                        Gizmos.color = Color.red;
-                    }
-                    else
-                    {
-                        Gizmos.color = Color.green;
-                    }
-
-                    Vector3 worldPosition = WorldPosition(new Vector2(ix, iy));
-                    Gizmos.DrawWireCube(worldPosition, new Vector3(1, 1, 1));
-
-                    if (cells[ix, iy].Item != null)
-                    {
-                        Gizmos.DrawWireSphere(worldPosition, 0.4f);
-                    }
+                    Handles.Label(worldPosition + Vector3.down * 0.2f, cells[ix, iy].Item.Type.ToString());
+                }
+                else
+                {
+                    Handles.Label(worldPosition + Vector3.down * 0.2f, "None");
                 }
             }
         }

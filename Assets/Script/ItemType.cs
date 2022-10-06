@@ -1,6 +1,6 @@
 ﻿public enum ItemType
 {
-    Block,
+    None,
     Box,
     Hex,
     Triangle,

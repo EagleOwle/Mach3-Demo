@@ -24,7 +24,7 @@ public class PrefabStore : ScriptableObject
 
     public Sprite GetSpriteByType(ItemType type)
     {
-        if (type == ItemType.Block)
+        if (type == ItemType.None)
         {
             return block;
         }
