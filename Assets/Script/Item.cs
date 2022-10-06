@@ -53,6 +53,25 @@ public class Item : MonoBehaviour
         spriteRenderer.color = color;
     }
 
+    public void StartScaleAndHide()
+    {
+        StartCoroutine(ScaleAndHide());
+    }
+
+    private IEnumerator ScaleAndHide()
+    {
+        while (spriteRenderer.color.a > 0)
+        {
+            yield return null;
+            transform.localScale += Vector3.one * Time.deltaTime;
+            Color color = spriteRenderer.color;
+            color.a-=Time.deltaTime;
+            spriteRenderer.color = color;
+        }
+
+        SelfDestroy();
+    }
+
     private float LerpAlpha(float alpha)
     {
         float lerp = Mathf.PingPong(Time.time, duration) / duration;

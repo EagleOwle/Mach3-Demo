@@ -88,7 +88,7 @@ public class Cell
 
     public void DestroyItem()
     {
-        Item.SelfDestroy();
+        Item.StartScaleAndHide();
         Item = null;
     }
 

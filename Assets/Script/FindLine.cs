@@ -5,100 +5,85 @@ using UnityEngine;
 
 public class FindLine : MonoBehaviour
 {
-    private List<Cell> line = new List<Cell>();
-
-    Cell[,] cells;
+    private Cell[,] cells;
+    private List<Cell> currentLine = new List<Cell>();
 
     public void CheckLine(Cell[,] cells)
     {
         this.cells = cells;
         CheckColum(0);
-        //Debug.Log("GetLength(0)= " + cells.GetLength(0));
-        //Debug.Log("GetLength(1)= " + cells.GetLength(1));
-
-        //int y = 0;
-        //ItemType type = ItemType.None;
-
-        //while (y < cells.GetLength(1))
-        //{
-        //    for (int x = 0; x < cells.GetLength(0); x++)
-        //    {
-        //        if(cells[x, y].type == CellType.Wall)
-        //        {
-        //            continue;
-        //        }
-
-        //        if(type == cells[x,y].Item.Type)
-        //        {
-        //            line.Add(cells[x,y]);
-        //        }
-        //        else
-        //        {
-        //            type = cells[x,y].Item.Type;
-        //            line.Clear();
-        //        }
-        //    }
-
-        //    DeleteLineItem(line);
-        //    line.Clear();
-        //    y++;
-        //}
-
-    }
-
-    private void DeleteLineItem(List<Cell> line)
-    {
-        if (line.Count > 2)
-        {
-
-            for (int i = 0; i < line.Count; i++)
-            {
-                line[i].DestroyItem();
-                //line[i].ChangeItemType(ItemType.None);
-            }
-        }
-
-        line.Clear();
     }
 
     private void CheckColum(int y)
     {
-        if (y < cells.GetLength(1) -1)
+        while (y < cells.GetLength(1) - 1)
         {
-            StartCoroutine(CheckLine(y));
-            DeleteLineItem(line);
+            CheckLine(y, out bool isBreak);
+
+            if(isBreak== true)
+            {
+                StateMachine.SetState<StateFall>();
+                break;
+            }
+
+            y++;
         }
     }
 
-    private IEnumerator CheckLine(int y)
+    private void CheckLine(int y, out bool isBreak)
     {
-        Debug.Log("CheckLine " + y);
+        isBreak = false;
+        ClearLineItem(currentLine);
         ItemType type = ItemType.None;
         int x = 0;
+
         while (x < cells.GetLength(0))
         {
-            yield return new WaitForSeconds(0.5f);
-
             if (cells[x, y].type != CellType.Wall)
             {
                 if (type == cells[x, y].Item.Type)
                 {
-                    line.Add(cells[x, y]);
+                    currentLine.Add(cells[x, y]);
                 }
                 else
                 {
-                    type = cells[x, y].Item.Type;
-                    line.Clear();
+                    if (currentLine.Count > 2)
+                    {
+                        ClearLineItem(currentLine);
+                        isBreak= true;
+                        break;
+                    }
+                    else
+                    {
+                        type = cells[x, y].Item.Type;
+                        ClearLineItem(currentLine);
+                        currentLine.Add(cells[x, y]);
+                    }
                 }
+            }
 
-                cells[x, y].Item.Select(true);
+            if (currentLine.Count > 2)
+            {
+                ClearLineItem(currentLine);
+                isBreak = true;
+                break;
             }
 
             x++;
         }
+    }
 
-        yield return new WaitForSeconds(0.1f);
-        CheckColum(++y);
+    private void ClearLineItem(List<Cell> line)
+    {
+        if (line.Count > 2)
+        {
+            for (int i = 0; i < line.Count; i++)
+            {
+                line[i].DestroyItem();
+            }
+        }
+
+        line.Clear();
     }
 
 }
