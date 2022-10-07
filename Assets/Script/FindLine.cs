@@ -6,84 +6,139 @@ using UnityEngine;
 public class FindLine : MonoBehaviour
 {
     private Cell[,] cells;
-    private List<Cell> currentLine = new List<Cell>();
+
+    private Cell[] tmpCell;
 
     public void CheckLine(Cell[,] cells)
     {
         this.cells = cells;
-        CheckColum(0);
-    }
 
-    private void CheckColum(int y)
-    {
-        while (y < cells.GetLength(1) - 1)
+        if (CheckLineY())
         {
-            CheckLine(y, out bool isBreak);
-
-            if(isBreak== true)
+            if (CheckLineX())
             {
-                StateMachine.SetState<StateFall>();
-                break;
+                Invoke(nameof(EndFind), 0.5f);
             }
-
-            y++;
         }
+
     }
 
-    private void CheckLine(int y, out bool isBreak)
+    private bool CheckLineY()
     {
-        isBreak = false;
-        ClearLineItem(currentLine);
-        ItemType type = ItemType.None;
+        bool isEnd = true;
         int x = 0;
-
-        while (x < cells.GetLength(0))
+        while (x < cells.GetLength(0) - 1)
         {
-            if (cells[x, y].type != CellType.Wall)
+            tmpCell = new Cell[cells.GetLength(1)];
+            for (int y = 0; y < cells.GetLength(1); y++)
             {
-                if (type == cells[x, y].Item.Type)
-                {
-                    currentLine.Add(cells[x, y]);
-                }
-                else
-                {
-                    if (currentLine.Count > 2)
-                    {
-                        ClearLineItem(currentLine);
-                        isBreak= true;
-                        break;
-                    }
-                    else
-                    {
-                        type = cells[x, y].Item.Type;
-                        ClearLineItem(currentLine);
-                        currentLine.Add(cells[x, y]);
-                    }
-                }
+                tmpCell[y] = cells[x, y];
             }
 
-            if (currentLine.Count > 2)
+            CheckArray(tmpCell, out bool isBreak);
+
+            if (isBreak == true)
             {
-                ClearLineItem(currentLine);
-                isBreak = true;
+                isEnd = false;
                 break;
             }
 
             x++;
         }
+
+        return isEnd;
     }
 
-    private void ClearLineItem(List<Cell> line)
+    private bool CheckLineX()
     {
-        if (line.Count > 2)
+        bool isEnd = true;
+        int y = 0;
+        while (y < cells.GetLength(1) - 1)
         {
-            for (int i = 0; i < line.Count; i++)
+            tmpCell = new Cell[cells.GetLength(0)];
+            for (int x = 0; x < cells.GetLength(0); x++)
             {
-                line[i].DestroyItem();
+                tmpCell[x] = cells[x, y];
+            }
+
+            CheckArray(tmpCell, out bool isBreak);
+
+            if (isBreak == true)
+            {
+                isEnd = false;
+                break;
+            }
+
+            y++;
+        }
+
+        return isEnd;
+    }
+
+    private void CheckArray(Cell[] cells, out bool isBreak)
+    {
+        isBreak = false;
+        ItemType type = ItemType.None;
+        List<Cell> currentLine = new List<Cell>();
+
+        for (int i = 0; i < cells.Length; i++)
+        {
+            if (cells[i].type != CellType.Wall)
+            {
+                if (type == cells[i].Item.Type)
+                {
+                    currentLine.Add(cells[i]);
+                }
+                else
+                {
+                    if (ClearLineItem(currentLine) == true)
+                    {
+                        isBreak = true;
+                        break;
+                    }
+                    else
+                    {
+                        ClearLineItem(currentLine);
+                        type = cells[i].Item.Type;
+                        currentLine.Add(cells[i]);
+                    }
+                }
             }
         }
 
-        line.Clear();
+        if (ClearLineItem(currentLine) == true)
+        {
+            isBreak = true;
+        }
+    }
+
+    private bool ClearLineItem(List<Cell> cells)
+    {
+        bool isBreak = false;
+
+        if (cells.Count > 2)
+        {
+            isBreak = true;
+            for (int i = 0; i < cells.Count; i++)
+            {
+                cells[i].DestroyItem();
+            }
+
+            Invoke(nameof(BreakFind), 0.5f);
+        }
+
+        cells.Clear();
+        return isBreak;
+    }
+
+    private void BreakFind()
+    {
+        StateMachine.SetState<StateFall>();
+    }
+
+    private void EndFind()
+    {
+        StateMachine.SetState<StateInput>();
     }
 
 }
