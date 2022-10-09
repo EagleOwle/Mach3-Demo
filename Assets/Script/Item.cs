@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Item : MonoBehaviour
 {
+    public Action eventOnPosition;
+
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private float speedMove = 5;
 
@@ -120,11 +122,14 @@ public class Item : MonoBehaviour
             else
             {
                 onPosition = true;
+                eventOnPosition?.Invoke();
             }
 
             yield return null;
 
         }
+
+
     }
 
 }

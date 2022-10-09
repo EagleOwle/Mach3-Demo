@@ -7,10 +7,11 @@ using UnityEngine;
 public class Board : MonoBehaviour, ITapListener
 {
     [SerializeField]private FindLine findLine;
+    [SerializeField] private FindLineByCross findLineByCross;
     private BoardSetting boardSetting;
     private Cell[,] cells;
     private List<Cell> lastLine;
-    private Cell currentSelectedCell;
+    private Cell selected;
 
     public void Initialise(BoardSetting boardSetting)
     {
@@ -126,26 +127,42 @@ public class Board : MonoBehaviour, ITapListener
 
     public void SelectCell(Cell cell)
     {
-        if (currentSelectedCell != null)
+        if (selected == null)
         {
-            if (currentSelectedCell != cell)
+            selected = cell;
+            return;
+        }
+
+        if (selected == cell)
+        {
+            return;
+        }
+
+        if (selected.FindNeigborsCell(cell))
+        {
+            cell.MutualSubstitution(selected);
+            selected.Item.eventOnPosition+= 
+            selected.Deselect();
+            selected = null;
+            /*
+            if (findLineByCross.StartFind(cell))
             {
-                if (currentSelectedCell.CheckNeigbors(cell))
-                {
-                    currentSelectedCell.Deselect();
-                    currentSelectedCell = null;
-                    StateMachine.SetState<StateFindLine>();
-                }
-                else
-                {
-                    currentSelectedCell.Deselect();
-                    currentSelectedCell = cell;
-                }
+                currentSelectedCell.Deselect();
+                currentSelectedCell = null;
+                StateMachine.SetState<StateFindLine>();
             }
+            else
+            {
+                cell.CheckNeigbors(currentSelectedCell);
+                currentSelectedCell.Deselect();
+                currentSelectedCell = null;
+            }
+            */
         }
         else
         {
-            currentSelectedCell = cell;
+            selected.Deselect();
+            selected = cell;
         }
     }
 

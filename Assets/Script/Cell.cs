@@ -7,13 +7,25 @@ public class Cell
     public Vector2 arrayPosition;
     public Vector2 worldPosition;
     public CellType type;
-    private Item item;
-    public Item Item
+    public ItemType ItemType
     {
         get
         {
-            return item;
+            if (item != null)
+            {
+                return item.Type;
+            }
+            else
+            {
+                return ItemType.None;
+            }
         }
+    }
+
+    private Item item;
+    public Item Item
+    {
+        get { return item; }
         set
         {
             item = value;
@@ -33,12 +45,33 @@ public class Cell
         return neighbors[(int)side];
     }
 
+    public Cell GetNeighborCell(Side side)
+    {
+        Cell neighbor = neighbors[(int)side].cell;
+        return neighbor;
+    }
+
+    public bool GetNeighborItem(Side side, out Item item)
+    {
+        item = null;
+
+        if (neighbors[(int)side].cell.item != null)
+        {
+            item = neighbors[(int)side].cell.item;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     public void Initialise(ITapListener tapListener, Vector2 arrayPosition, Vector2 worldPosition)
     {
         this.tapListener = tapListener;
         this.arrayPosition = arrayPosition;
         this.worldPosition = worldPosition;
-        //Debug.Log("ArrayPosition = " + arrayPosition);
+
         neighbors = new Neighbor[]
         {
             new Neighbor(Side.North),
@@ -59,20 +92,37 @@ public class Cell
 
     }
 
-    public bool CheckNeigbors(Cell cell)
+    public bool FindNeigborsCell(Cell cell, bool diagonalSearch = false)
     {
         foreach (var item in neighbors)
         {
-            if(item.cell == cell)
+            #region  //Исключаем поиск по диагонали
+            if (diagonalSearch == false)
             {
-                Item nextItem = cell.Item;
-                cell.Item = Item;
-                Item = nextItem;
+                if (item.side == Side.EastNorth ||
+                   item.side == Side.EastSouth ||
+                   item.side == Side.WestNorth ||
+                   item.side == Side.WestSouth)
+                {
+                    continue;
+                }
+            }
+            #endregion
+
+            if (item.cell == cell)
+            {
                 return true;
             }
         }
 
         return false;
+    }
+
+    public void MutualSubstitution(Cell targetCell)
+    {
+        Item nextItem = targetCell.Item;
+        targetCell.Item = Item;
+        Item = nextItem;
     }
 
     public void Deselect()
@@ -82,6 +132,8 @@ public class Cell
 
     public void Select()
     {
+        if (item == null) return;
+
         item.Select();
         this.tapListener.SelectCell(this);
     }
