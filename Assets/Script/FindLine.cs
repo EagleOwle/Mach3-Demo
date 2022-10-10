@@ -5,27 +5,37 @@ using UnityEngine;
 
 public class FindLine : MonoBehaviour
 {
+    public Action eventEndFind;
+    public Action eventBreakFind;
     private Cell[,] cells;
-
     private Cell[] tmpCell;
 
-    public void CheckLine(Cell[,] cells)
+    public void Initialise(Cell[,] cells)
     {
         this.cells = cells;
+    }
 
-        if (CheckLineY())
+    public void CheckLine()
+    {
+        if (CheckLineX())
         {
-            if (CheckLineX())
+            if (CheckLineY())
             {
-                Invoke(nameof(EndFind), 0.5f);
+                EndFind();
+            }
+            else
+            {
+                BreakFind();
             }
         }
-
+        else
+        {
+            BreakFind();
+        }
     }
 
     private bool CheckLineY()
     {
-        bool isEnd = true;
         int x = 0;
         while (x < cells.GetLength(0) - 1)
         {
@@ -35,23 +45,21 @@ public class FindLine : MonoBehaviour
                 tmpCell[y] = cells[x, y];
             }
 
-            CheckArray(tmpCell, out bool isBreak);
+            CheckLineOrCollum(tmpCell, out bool isBreak);
 
             if (isBreak == true)
             {
-                isEnd = false;
-                break;
+                return false;
             }
 
             x++;
         }
 
-        return isEnd;
+        return true;
     }
 
     private bool CheckLineX()
     {
-        bool isEnd = true;
         int y = 0;
         while (y < cells.GetLength(1) - 1)
         {
@@ -61,21 +69,20 @@ public class FindLine : MonoBehaviour
                 tmpCell[x] = cells[x, y];
             }
 
-            CheckArray(tmpCell, out bool isBreak);
+            CheckLineOrCollum(tmpCell, out bool isBreak);
 
             if (isBreak == true)
             {
-                isEnd = false;
-                break;
+                return false;
             }
 
             y++;
         }
 
-        return isEnd;
+        return true;
     }
 
-    private void CheckArray(Cell[] cells, out bool isBreak)
+    private void CheckLineOrCollum(Cell[] cells, out bool isBreak)
     {
         isBreak = false;
         ItemType type = ItemType.None;
@@ -98,7 +105,7 @@ public class FindLine : MonoBehaviour
                     }
                     else
                     {
-                        ClearLineItem(currentLine);
+                        currentLine.Clear();
                         type = cells[i].Item.Type;
                         currentLine.Add(cells[i]);
                     }
@@ -106,7 +113,7 @@ public class FindLine : MonoBehaviour
             }
         }
 
-        if (ClearLineItem(currentLine) == true)
+        if (isBreak == false && ClearLineItem(currentLine) == true)
         {
             isBreak = true;
         }
@@ -114,31 +121,33 @@ public class FindLine : MonoBehaviour
 
     private bool ClearLineItem(List<Cell> cells)
     {
-        bool isBreak = false;
-
         if (cells.Count > 2)
         {
-            isBreak = true;
             for (int i = 0; i < cells.Count; i++)
             {
                 cells[i].DestroyItem();
             }
 
-            Invoke(nameof(BreakFind), 0.5f);
-        }
+            cells.Clear();
 
-        cells.Clear();
-        return isBreak;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private void BreakFind()
     {
+        //eventBreakFind.Invoke();
         StateMachine.SetState<StateFall>();
     }
 
     private void EndFind()
     {
-        StateMachine.SetState<StateInput>();
+        eventEndFind.Invoke();
+        //StateMachine.SetState<StateInput>();
     }
 
 }

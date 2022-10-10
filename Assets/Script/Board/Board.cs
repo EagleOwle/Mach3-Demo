@@ -4,35 +4,45 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class Board : MonoBehaviour, ITapListener
+public class Board : MonoBehaviour
 {
-    [SerializeField]private FindLine findLine;
-    [SerializeField] private FindLineByCross findLineByCross;
+    [SerializeField] private FindLine findLine;
+    [SerializeField] private CellsDown cellsDown;
+    [SerializeField] private SelectorHandler selector;
+
     private BoardSetting boardSetting;
     private Cell[,] cells;
     private List<Cell> lastLine;
-    private Cell selected;
 
     public void Initialise(BoardSetting boardSetting)
     {
         this.boardSetting = boardSetting;
         cells = new Cell[(int)this.boardSetting.boardSize.x, (int)this.boardSetting.boardSize.y];
         lastLine = new List<Cell>();
-
         StateMachine.actionChangeState += ChangeState;
 
         CreateCells();
         FindNeiborth();
 
         SpawnWallItem();
-        SpawnFirstItem(out bool onSpawn);
+
+        findLine.Initialise(cells);
+        selector.Initialise(ref findLine.eventEndFind);
+
+        cellsDown.eventEndDown += EndGoDown;
+        cellsDown.Initialise(boardSetting, cells);
     }
 
     private void ChangeState(State obj)
     {
         if (StateMachine.currentState is StateFindLine)
         {
-            findLine.CheckLine(cells);
+            findLine.CheckLine();
+        }
+
+        if (StateMachine.currentState is StateFall)
+        {
+            cellsDown.StartDown();
         }
     }
 
@@ -43,7 +53,7 @@ public class Board : MonoBehaviour, ITapListener
             for (int ix = 0; ix < boardSetting.boardSize.x; ix++)
             {
                 Cell cell = new Cell();
-                cell.Initialise(this, new Vector2(ix, iy), WorldPosition(new Vector2(ix, iy)));
+                cell.Initialise(selector, new Vector2(ix, iy), WorldPosition(new Vector2(ix, iy)));
                 
                 cells[ix, iy] = cell;
 
@@ -102,9 +112,8 @@ public class Board : MonoBehaviour, ITapListener
         }
     }
 
-    public void SpawnFirstItem(out bool onSpawn)
+    private void SpawnFirstItem()
     {
-        onSpawn = false;
         foreach (var cell in lastLine)
         {
             if (cell.Item == null)
@@ -113,8 +122,43 @@ public class Board : MonoBehaviour, ITapListener
                 Item tmp = GameObject.Instantiate(PrefabStore.Instance.itemPrefab, worldPosition, Quaternion.identity);
                 tmp.SetRandomItem();
                 cell.Item = tmp;
-                onSpawn = true;
             }
+        }
+    }
+
+    private bool FindEmptyCell
+    {
+        get
+        {
+            for (int iy = 0; iy < boardSetting.boardSize.y; iy++)
+            {
+                for (int ix = 0; ix < boardSetting.boardSize.x; ix++)
+                {
+                    if (cells[ix, iy].type == CellType.Field)
+                    {
+                        if (cells[ix, iy].Item == null)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+        
+    }
+
+    private void EndGoDown()
+    {
+        if(FindEmptyCell == true)
+        {
+            SpawnFirstItem();
+            cellsDown.StartDown();
+        }
+        else
+        {
+            StateMachine.SetState<StateFindLine>();
         }
     }
 
@@ -123,47 +167,6 @@ public class Board : MonoBehaviour, ITapListener
         float x = (arrayPosition.x * boardSetting.itemSize) - boardSetting.boardSize.x / 2 + boardSetting.screenOffset.x;
         float y = (arrayPosition.y * boardSetting.itemSize) - boardSetting.boardSize.y / 2 + boardSetting.screenOffset.y;
         return new Vector2(x, y);
-    }
-
-    public void SelectCell(Cell cell)
-    {
-        if (selected == null)
-        {
-            selected = cell;
-            return;
-        }
-
-        if (selected == cell)
-        {
-            return;
-        }
-
-        if (selected.FindNeigborsCell(cell))
-        {
-            cell.MutualSubstitution(selected);
-            selected.Item.eventOnPosition+= 
-            selected.Deselect();
-            selected = null;
-            /*
-            if (findLineByCross.StartFind(cell))
-            {
-                currentSelectedCell.Deselect();
-                currentSelectedCell = null;
-                StateMachine.SetState<StateFindLine>();
-            }
-            else
-            {
-                cell.CheckNeigbors(currentSelectedCell);
-                currentSelectedCell.Deselect();
-                currentSelectedCell = null;
-            }
-            */
-        }
-        else
-        {
-            selected.Deselect();
-            selected = cell;
-        }
     }
 
     public void SetNeiborth(Neighbor neighbor, Vector2 position)
@@ -265,29 +268,6 @@ public class Board : MonoBehaviour, ITapListener
         }
     }
 
-    public void GoDown(int y)
-    {
-        for (int x = 0; x < boardSetting.boardSize.x; x++)
-        {
-            if (cells[x, y].type == CellType.Wall)
-                continue;
-
-            if (cells[x, y].Item == null)
-                continue;
-
-            Neighbor neighbor = cells[x, y].GetNeighbor(Side.South);
-
-            if (neighbor.cell.type == CellType.Wall)
-                continue;
-
-            if (neighbor.cell.Item == null)
-            {
-                neighbor.cell.Item = (cells[x, y].Item);
-                cells[x, y].Item = null;
-            }
-        }
-    }
-
     private void OnDrawGizmos()
     {
         if (cells == null) return;
@@ -319,5 +299,7 @@ public class Board : MonoBehaviour, ITapListener
         }
 
     }
+
+    
 
 }
