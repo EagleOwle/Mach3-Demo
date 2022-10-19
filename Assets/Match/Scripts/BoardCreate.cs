@@ -5,11 +5,8 @@ namespace Match
 {
     public class BoardCreate : MonoBehaviour
     {
-        private GamePreference gamePreference;
-
         public void Create(GamePreference gamePreference, out Cell[,] cells, out Cell[] firstRow)
         {
-            this.gamePreference = gamePreference;
             cells = new Cell[gamePreference.boardSetting.sizeX, gamePreference.boardSetting.sizeY];
             firstRow = new Cell[gamePreference.boardSetting.sizeX];
 
@@ -31,19 +28,13 @@ namespace Match
                 }
             }
 
-            FindNeiborth(cells);
-        }
-
-        private void FindNeiborth(Cell[,] cells)
-        {
             for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
             {
                 for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
                 {
-                   cells[x, y].SetNeiborth(cells);
+                    cells[x, y].Initialise(x, y, gamePreference, cells);
                 }
             }
-
         }
 
     }

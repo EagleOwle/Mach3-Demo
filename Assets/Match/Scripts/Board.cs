@@ -29,13 +29,6 @@ namespace Match
 
             }
         }
-        private Sprite RandomItem
-        {
-            get
-            {
-                return gamePreference.items[Random.Range(0, gamePreference.items.Length)].sprite;
-            }
-        }
 
         private const float tweenDuration = 1.5f;
 
@@ -49,15 +42,32 @@ namespace Match
         {
             var sequence = DOTween.Sequence();
 
-            foreach (var item in firstRow)
+            foreach (var cell in firstRow)
             {
-                item.image.sprite = RandomItem;
-                item.image.transform.localScale = Vector3.zero;
-                sequence.Join(item.image.transform.DOScale(Vector3.one, tweenDuration));
+                cell.SetRandomType();
+                sequence = cell.ScaleEffect(tweenDuration, sequence);
+            }
+
+            await sequence.Play().AsyncWaitForCompletion();
+            await FallItem();
+        }
+
+        private async Task FallItem()
+        {
+            var sequence = DOTween.Sequence();
+
+            for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
+            {
+                for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
+                {
+                    if (cells[x, y].Type != Type.None && cells[x, y].Bottom != null)
+                    {
+                        sequence = cells[x, y].Fall(tweenDuration, sequence);
+                    }
+                }
             }
 
             await sequence.Play().AsyncWaitForCompletion();
         }
-
     }
 }

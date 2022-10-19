@@ -20,7 +20,13 @@ MonoBehaviour:
   prefabStore:
     prefabCell: {fileID: 1388558267831761417, guid: a2d4cad11d94d0345b0475adaca446a2, type: 3}
   items:
-  - sprite: {fileID: 21300000, guid: 3d7226a7f092a3a469cca7f4a0dd55e2, type: 3}
-  - sprite: {fileID: 21300000, guid: b2643c0fcdcb14147ab9246a2579dc62, type: 3}
-  - sprite: {fileID: 21300000, guid: 29e9a621a5717964ea5d7efcd6fc7b2a, type: 3}
-  - sprite: {fileID: 21300000, guid: 067c313ff6afe5845afa4f3085892560, type: 3}
+  - type: 2
+    sprite: {fileID: 21300000, guid: 3d7226a7f092a3a469cca7f4a0dd55e2, type: 3}
+  - type: 3
+    sprite: {fileID: 21300000, guid: b2643c0fcdcb14147ab9246a2579dc62, type: 3}
+  - type: 1
+    sprite: {fileID: 21300000, guid: 29e9a621a5717964ea5d7efcd6fc7b2a, type: 3}
+  - type: 0
+    sprite: {fileID: 21300000, guid: 067c313ff6afe5845afa4f3085892560, type: 3}
+  - type: 4
+    sprite: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
