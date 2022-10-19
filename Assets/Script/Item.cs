@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Item : MonoBehaviour
 {
-    public Action eventOnPosition;
+    public Action<Item> eventOnPosition;
 
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private float speedMove = 5;
@@ -117,12 +117,14 @@ public class Item : MonoBehaviour
         {
             if (transform.position != (Vector3)targetPosition)
             {
-                transform.position = Vector3.Lerp(transform.position, targetPosition, speedMove * Time.deltaTime);
+                //transform.position = Vector3.Lerp(transform.position, targetPosition, speedMove * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, targetPosition, speedMove * Time.deltaTime);
             }
             else
             {
                 onPosition = true;
-                eventOnPosition?.Invoke();
+                eventOnPosition?.Invoke(this);
+                //Debug.Log("OnPosition");
             }
 
             yield return null;

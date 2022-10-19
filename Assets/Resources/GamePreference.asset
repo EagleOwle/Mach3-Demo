@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 333af2f5a38fbbd409613cf74241fae1, type: 3}
+  m_Name: GamePreference
+  m_EditorClassIdentifier: 
+  boardSetting:
+    sizeX: 5
+    sizeY: 8
+    boardOffsetX: 100
+    boardOffsetY: 100
+  prefabStore:
+    prefabCell: {fileID: 1388558267831761417, guid: a2d4cad11d94d0345b0475adaca446a2, type: 3}
+  items:
+  - sprite: {fileID: 21300000, guid: 3d7226a7f092a3a469cca7f4a0dd55e2, type: 3}
+  - sprite: {fileID: 21300000, guid: b2643c0fcdcb14147ab9246a2579dc62, type: 3}
+  - sprite: {fileID: 21300000, guid: 29e9a621a5717964ea5d7efcd6fc7b2a, type: 3}
+  - sprite: {fileID: 21300000, guid: 067c313ff6afe5845afa4f3085892560, type: 3}
