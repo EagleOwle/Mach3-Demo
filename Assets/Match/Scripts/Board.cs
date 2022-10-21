@@ -38,18 +38,33 @@ namespace Match
             SpawnFirstRow();
         }
 
+        private void Spawn()
+        {
+            foreach (var cell in firstRow)
+            {
+                if(cell.Type == Type.None)
+                {
+
+                }
+            }
+        }
+
         private async void SpawnFirstRow()
         {
             var sequence = DOTween.Sequence();
 
             foreach (var cell in firstRow)
             {
-                cell.SetRandomType();
-                sequence = cell.ScaleEffect(tweenDuration, sequence);
+                if (cell.Type == Type.None)
+                {
+                    cell.SpawnRandomType();
+                    sequence = cell.ScaleEffect(tweenDuration, sequence);
+                }
             }
 
             await sequence.Play().AsyncWaitForCompletion();
-            await FallItem();
+            FallItem();
+
         }
 
         private async Task FallItem()
@@ -60,10 +75,7 @@ namespace Match
             {
                 for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
                 {
-                    if (cells[x, y].Type != Type.None && cells[x, y].Bottom != null)
-                    {
-                        sequence = cells[x, y].Fall(tweenDuration, sequence);
-                    }
+                    cells[x, y].Fall(tweenDuration, ref sequence);
                 }
             }
 

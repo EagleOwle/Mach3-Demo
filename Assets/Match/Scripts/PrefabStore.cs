@@ -7,6 +7,6 @@ namespace Match
     public class PrefabStore
     {
         public Cell prefabCell;
-
+        public Item prefabItem;
     }
 }

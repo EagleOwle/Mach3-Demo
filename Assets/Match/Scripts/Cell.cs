@@ -1,4 +1,6 @@
 ﻿using DG.Tweening;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +9,8 @@ namespace Match
     public class Cell : MonoBehaviour
     {
         [SerializeField] private RectTransform rectTransform;
+        [SerializeField] private TextMeshProUGUI text;
+
         public Vector2 Size
         {
             get
@@ -38,18 +42,35 @@ namespace Match
         {
             get
             {
-                return item.Type;
+                if (item == null)
+                {
+                    text.text = "None";
+                    return Type.None;
+                }
+                else
+                {
+                    text.text = item.Type.ToString();
+                    return item.Type;
+                }
             }
         }
 
-        public void SetRandomType() => item.SetRandomType();
+        private GamePreference preference;
+
+        public void SpawnRandomType()
+        {
+            Item item = Instantiate(preference.prefabStore.prefabItem, transform);
+            this.item = item;
+            this.item.Initialise(preference);
+            this.item.SetRandomType();
+        }
 
         public void Initialise(int x, int y,  GamePreference preference, Cell[,] cells)
         {
+            this.preference = preference;
             this.x = x;
             this.y = y;
             SetNeiborth(cells);
-            item.Initialise(preference);
         }
 
         private void SetNeiborth(Cell[,] cells)
@@ -67,48 +88,50 @@ namespace Match
             return sequence;
         }
 
-        public Sequence Fall(float tweenDuration, Sequence sequence)
+        public void Fall(float tweenDuration, ref Sequence sequence)
         {
-            sequence.Join(item.transform.DOMove(Bottom.transform.position, tweenDuration));
-            Bottom.SetItem(item);
-            return sequence;
+            if (item == null) return;
+
+            Cell lastCell = FindLastBottom(Bottom);
+
+            if (lastCell != null)
+            {
+                Vector2 bottomPosition = new Vector2(lastCell.transform.position.x + lastCell.Size.x / 2, lastCell.transform.position.y + lastCell.Size.y / 2);
+                sequence.Join(item.transform.DOMove(bottomPosition, tweenDuration));
+                //Bottom.SetItem(item);
+                item = null;
+            }
         }
 
-        //private void OnDrawGizmosSelected()
-        //{
-        //    Gizmos.color = Color.blue;
-        //    RectTransform rectTransform = GetComponent<RectTransform>();
-        //    Gizmos.matrix = rectTransform.localToWorldMatrix;// CanvasExtensions.GetCanvasMatrix(canvas);
-        //    Gizmos.DrawWireCube(Vector3.zero, Vector3.one * 30);
 
-        //    if (Top != null)
-        //    {
-        //        rectTransform = Top.GetComponent<RectTransform>();
-        //        Gizmos.matrix = rectTransform.localToWorldMatrix;
-        //        Gizmos.DrawWireCube(Vector3.zero, Vector3.one * 30);
-        //    }
+        public Cell FindLastBottom(Cell cell)
+        {
+            Cell bottom = null;
 
-        //    if (Right != null)
-        //    {
-        //        rectTransform = Right.GetComponent<RectTransform>();
-        //        Gizmos.matrix = rectTransform.localToWorldMatrix;
-        //        Gizmos.DrawWireCube(Right.transform.position, Vector3.one * 30);
-        //    }
+            if (cell != null && cell.Type == Type.None)
+            {
+                bottom = cell;
+                Cell tmp = FindLastBottom(cell.Bottom);
+                if (tmp != null)
+                {
+                    bottom = tmp;
+                }
+            }
 
-        //    if (Bottom != null)
-        //    {
-        //        rectTransform = Bottom.GetComponent<RectTransform>();
-        //        Gizmos.matrix = rectTransform.localToWorldMatrix;
-        //        Gizmos.DrawWireCube(Bottom.transform.position, Vector3.one * 30);
-        //    }
+            return bottom;
+        }
 
-        //    if (Left != null)
-        //    {
-        //        rectTransform = Left.GetComponent<RectTransform>();
-        //        Gizmos.matrix = rectTransform.localToWorldMatrix;
-        //        Gizmos.DrawWireCube(Left.transform.position, Vector3.one * 30);
-        //    }
-        //}
+        public Vector2 FindDownPosition(Cell cell)
+        {
+            Vector2 position = new Vector2(cell.transform.position.x + cell.Size.x / 2, cell.transform.position.y + cell.Size.y / 2);
+
+            if (cell.Bottom != null && cell.Bottom.Type == Type.None)
+            {
+                position = FindDownPosition(cell.Bottom);
+            }
+
+            return position;
+        }
 
     }
 }
