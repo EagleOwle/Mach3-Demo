@@ -6,6 +6,8 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Threading;
+using Cysharp.Threading.Tasks;
+using System.Collections;
 
 namespace Match
 {
@@ -14,8 +16,6 @@ namespace Match
     {
         [SerializeField] private RectTransform rectTransform;
         [SerializeField] private TextMeshProUGUI text;
-
-        private CancellationTokenSource cancellationSource;
 
         public Vector2 Size
         {
@@ -75,7 +75,6 @@ namespace Match
 
         public void Initialise(int x, int y,  GamePreference preference, Cell[,] cells)
         {
-            cancellationSource = new CancellationTokenSource();
             this.preference = preference;
             this.x = x;
             this.y = y;
@@ -137,31 +136,32 @@ namespace Match
 
         public void DestroyItem()
         {
-            ProcessDestroyItem();
-        }
-
-        private async void ProcessDestroyItem()
-        {
-            Item item = this.item;
-            this.item = null;
+            if (item == null) return;
 
             CanvasGroup canvasGroup = GameObject.FindObjectOfType<CanvasGroup>();
-
             item.transform.SetParent(canvasGroup.transform);
-            item.transform.SetAsLastSibling();
-            canvasGroup.alpha = 1;
-
-            var sequence = DOTween.Sequence();
-            sequence.Join(canvasGroup.DOFade(0, preference.boardSetting.tweenDuration));
-            sequence.Join(item.transform.DOScale(Vector3.one * 1.5f, preference.boardSetting.tweenDuration));
-            await sequence.Play().AsyncWaitForCompletion();
-            Destroy(item.gameObject);
+            item.StartScaleAndHide();
+            item = null;
+            //ProcessDestroyItem();
         }
 
-        private void OnDestroy()
-        {
-            cancellationSource.Cancel();
-        }
+        //private async void ProcessDestroyItem()
+        //{
+        //    Item item = this.item;
+        //    this.item = null;
+
+        //    CanvasGroup canvasGroup = GameObject.FindObjectOfType<CanvasGroup>();
+
+        //    item.transform.SetParent(canvasGroup.transform);
+        //    item.transform.SetAsLastSibling();
+        //    canvasGroup.alpha = 1;
+
+        //    var sequence = DOTween.Sequence();
+        //    sequence.Join(canvasGroup.DOFade(0, preference.boardSetting.tweenDuration));
+        //    sequence.Join(item.transform.DOScale(Vector3.one * 1.5f, preference.boardSetting.tweenDuration));
+        //    await sequence.Play().AsyncWaitForCompletion();
+        //    Destroy(item.gameObject);
+        //}
 
         public void GetMatchNeigbor(Direction direction, Type type, List<Cell> tmpCells)
         {
@@ -203,8 +203,6 @@ namespace Match
 
             
         }
-
-        
 
     }
 }

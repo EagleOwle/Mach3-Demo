@@ -5,15 +5,11 @@ using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 
 namespace Match
 {
-    public interface IDestroyItems
-    {
-        void IDestroyItems(Cell[] cells);
-    }
-
-    public class Board : MonoBehaviour, IDestroyItems
+    public class Board : MonoBehaviour
     {
         [SerializeField] private GamePreference gamePreference;
         [SerializeField] private BoardCreate boardCreate;
@@ -40,9 +36,14 @@ namespace Match
 
         private CancellationTokenSource cancellation;
 
-        private void Start()
+        private void Awake()
         {
             cancellation = new CancellationTokenSource();
+            cancellation.RegisterRaiseCancelOnDestroy(this);
+        }
+
+        private void Start()
+        {
             boardCreate.Create(gamePreference, out cells, out firstRow);
             UpdateBoard();
         }
@@ -75,6 +76,7 @@ namespace Match
             else
             {
                 FindMatch();
+                //UpdateBoard();
             }
         }
 
@@ -112,15 +114,15 @@ namespace Match
 
         private void FindMatch()
         {
-            List<Cell> tmpCells = new List<Cell>();
+            List<Cell> allCells = new List<Cell>();
 
             for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
             {
                 for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
                 {
-                    tmpCells.Clear();
+                    List<Cell> tmpCells = new List<Cell>();
 
-                    if (cells[x,y].Type == Type.None) continue;
+                    if (cells[x, y].Type == Type.None) continue;
 
                     cells[x, y].GetMatchNeigbor(Direction.Top, cells[x, y].Type, tmpCells);
                     cells[x, y].GetMatchNeigbor(Direction.Right, cells[x, y].Type, tmpCells);
@@ -129,19 +131,14 @@ namespace Match
 
                     if (tmpCells.Count > 2)
                     {
-                        IDestroyItems(tmpCells.ToArray());
+                        allCells.AddRange(tmpCells);
                     }
                 }
             }
 
-            UpdateBoard();
-        }
-
-        public void IDestroyItems(Cell[] cells)
-        {
-            for (int i = 0; i < cells.Length; i++)
+            for (int i = 0; i < allCells.Count; i++)
             {
-                cells[i].DestroyItem();
+                allCells[i].DestroyItem();
             }
         }
 
@@ -151,11 +148,6 @@ namespace Match
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             }
-        }
-
-        private void OnDestroy()
-        {
-            cancellation.Cancel();
         }
 
     }

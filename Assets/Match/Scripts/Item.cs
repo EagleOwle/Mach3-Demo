@@ -6,11 +6,11 @@ namespace Match
 {
     public class Item : MonoBehaviour
     {
-        private GamePreference preference;
+        [SerializeField] private Image image;
         [SerializeField]private Type type;
         public Type Type => type;
-
-       [SerializeField] private Image image;
+        private GamePreference preference;
+        
 
         public void Initialise(GamePreference preference)
         {
@@ -26,6 +26,35 @@ namespace Match
             image.sprite = preference.GetItemByType(type).sprite;
         }
 
+        public void StartScaleAndHide()
+        {
+            StartCoroutine(ScaleAndHide());
+        }
 
+        private IEnumerator ScaleAndHide()
+        {
+            while (image.color.a > 0)
+            {
+                transform.localScale += Vector3.one * Time.deltaTime;
+                Color color = image.color;
+                color.a -= Time.deltaTime;
+                image.color = color;
+
+                if(image.color.a == 0.5f )
+                {
+                    Debug.Break();
+                }
+
+                yield return null;
+                
+            }
+
+            SelfDestroy();
+        }
+
+        private void SelfDestroy()
+        {
+            Destroy(gameObject);
+        }
     }
 }
