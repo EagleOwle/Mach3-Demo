@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: GamePreference
   m_EditorClassIdentifier: 
   boardSetting:
+    tweenDuration: 0.5
     sizeX: 5
     sizeY: 8
     boardOffsetX: 100

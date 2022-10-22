@@ -1,15 +1,21 @@
 ﻿using DG.Tweening;
+using System.Collections.Generic;
 using TMPro;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Threading;
 
 namespace Match
 {
+
     public class Cell : MonoBehaviour
     {
         [SerializeField] private RectTransform rectTransform;
         [SerializeField] private TextMeshProUGUI text;
+
+        private CancellationTokenSource cancellationSource;
 
         public Vector2 Size
         {
@@ -42,6 +48,8 @@ namespace Match
         {
             get
             {
+                text.transform.SetAsLastSibling();
+
                 if (item == null)
                 {
                     text.text = "None";
@@ -67,6 +75,7 @@ namespace Match
 
         public void Initialise(int x, int y,  GamePreference preference, Cell[,] cells)
         {
+            cancellationSource = new CancellationTokenSource();
             this.preference = preference;
             this.x = x;
             this.y = y;
@@ -88,6 +97,12 @@ namespace Match
             return sequence;
         }
 
+        public Sequence HalfScaleEffect(float tweenDuration, Sequence sequence)
+        {
+            sequence.Join(item.transform.DOScale(Vector3.one * 0.5f, tweenDuration));
+            return sequence;
+        }
+
         public void Fall(float tweenDuration, ref Sequence sequence)
         {
             if (item == null) return;
@@ -98,11 +113,10 @@ namespace Match
             {
                 Vector2 bottomPosition = new Vector2(lastCell.transform.position.x + lastCell.Size.x / 2, lastCell.transform.position.y + lastCell.Size.y / 2);
                 sequence.Join(item.transform.DOMove(bottomPosition, tweenDuration));
-                //Bottom.SetItem(item);
+                lastCell.SetItem(item);
                 item = null;
             }
         }
-
 
         public Cell FindLastBottom(Cell cell)
         {
@@ -121,17 +135,76 @@ namespace Match
             return bottom;
         }
 
-        public Vector2 FindDownPosition(Cell cell)
+        public void DestroyItem()
         {
-            Vector2 position = new Vector2(cell.transform.position.x + cell.Size.x / 2, cell.transform.position.y + cell.Size.y / 2);
+            ProcessDestroyItem();
+        }
 
-            if (cell.Bottom != null && cell.Bottom.Type == Type.None)
+        private async void ProcessDestroyItem()
+        {
+            Item item = this.item;
+            this.item = null;
+
+            CanvasGroup canvasGroup = GameObject.FindObjectOfType<CanvasGroup>();
+
+            item.transform.SetParent(canvasGroup.transform);
+            item.transform.SetAsLastSibling();
+            canvasGroup.alpha = 1;
+
+            var sequence = DOTween.Sequence();
+            sequence.Join(canvasGroup.DOFade(0, preference.boardSetting.tweenDuration));
+            sequence.Join(item.transform.DOScale(Vector3.one * 1.5f, preference.boardSetting.tweenDuration));
+            await sequence.Play().AsyncWaitForCompletion();
+            Destroy(item.gameObject);
+        }
+
+        private void OnDestroy()
+        {
+            cancellationSource.Cancel();
+        }
+
+        public void GetMatchNeigbor(Direction direction, Type type, List<Cell> tmpCells)
+        {
+            if (!tmpCells.Contains(this))
             {
-                position = FindDownPosition(cell.Bottom);
+                tmpCells.Add(this);
             }
 
-            return position;
+            switch (direction)
+            {
+                case Direction.Top:
+                    if (Top != null && Top.Type == type)
+                    {
+                        Top.GetMatchNeigbor(direction, type, tmpCells);
+                    }
+                    break;
+                case Direction.Right:
+                    if (Right != null && Right.Type == type)
+                    {
+                        Right.GetMatchNeigbor(direction, type, tmpCells);
+                    }
+                    break;
+                case Direction.Bottom:
+                    if (Bottom != null && Bottom.Type == type)
+                    {
+                        Bottom.GetMatchNeigbor(direction, type, tmpCells);
+                    }
+                    break;
+                case Direction.Left:
+                    if (Left != null && Left.Type == type)
+                    {
+                        Left.GetMatchNeigbor(direction, type, tmpCells);
+                    }
+                    break;
+                default:
+                    Debug.LogError("No direction value: " + direction);
+                    break;
+            }
+
+            
         }
+
+        
 
     }
 }
