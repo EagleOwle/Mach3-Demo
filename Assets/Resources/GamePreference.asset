@@ -14,13 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardSetting:
     tweenDuration: 0.5
-    sizeX: 5
+    sizeX: 4
     sizeY: 8
     boardOffsetX: 100
     boardOffsetY: 100
   prefabStore:
-    prefabCell: {fileID: 1388558267831761417, guid: a2d4cad11d94d0345b0475adaca446a2, type: 3}
-    prefabItem: {fileID: 5793073931945732121, guid: d5dd3b0fb75e1c5438647b10b5f4ff33, type: 3}
+    prefabCell: {fileID: 1388558267831761417, guid: a2d4cad11d94d0345b0475adaca446a2,
+      type: 3}
+    prefabItem: {fileID: 5793073931945732121, guid: d5dd3b0fb75e1c5438647b10b5f4ff33,
+      type: 3}
   items:
   - type: 2
     sprite: {fileID: 21300000, guid: 3d7226a7f092a3a469cca7f4a0dd55e2, type: 3}

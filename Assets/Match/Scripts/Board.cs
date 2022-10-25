@@ -10,14 +10,6 @@ using System;
 
 namespace Match
 {
-    public enum State
-    {
-        Start,
-        Spawn,
-        Down,
-        Math
-    }
-
     public class Board : MonoBehaviour
     {
         [SerializeField] private GamePreference gamePreference;
@@ -68,11 +60,11 @@ namespace Match
             Debug.Log("Start Update Board Routine");
             while (BoardFull == false)
             {
-                yield return StartCoroutine(SpawnItemRoutine());
                 FallItem();
+                yield return StartCoroutine(SpawnItemRoutine());
             }
-
-            StartCoroutine(FindMatch());
+            
+            //StartCoroutine(FindMatch());
         }
 
         private IEnumerator SpawnItemRoutine()
@@ -98,9 +90,24 @@ namespace Match
                         waitSpawnItems.RemoveAt(i);
                     }
                 }
-
-                yield return null;
             }
+
+            yield return null;// StartCoroutine(FallItemRoutine());
+        }
+
+        private IEnumerator FallItemRoutine()
+        {
+            Debug.Log("Fall Item");
+
+            for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
+            {
+                for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
+                {
+                    cells[x, y].Fall();
+                }
+            }
+
+            yield return null;
         }
 
         private IEnumerator FindMatch()
@@ -197,7 +204,6 @@ namespace Match
                     cells[x, y].Fall();
                 }
             }
-
         }   
 
         private void Update()

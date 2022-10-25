@@ -12,7 +12,6 @@ namespace Match
         private GamePreference preference;
 
         public bool endSpawn = false;
-        public bool onPosition = true;
 
         public Vector3 offsetPosition;
 
@@ -20,7 +19,6 @@ namespace Match
         {
             this.preference = preference;
             type = Type.None;
-            offsetPosition = new Vector2(size.x / 2, size.y / 2);
         }
 
         public void SetRandomType()
@@ -47,18 +45,11 @@ namespace Match
 
         private IEnumerator MovePositionRoutine()
         {
-            onPosition = false;
-            image.color = Color.red;
-
-            while (transform.localPosition != offsetPosition)// targetPosition)
+            while (transform.localPosition != offsetPosition)
             {
-                //transform.localPosition = Vector3.Lerp(transform.position, Vector3.zero, Time.deltaTime * 200);
                 transform.localPosition = Vector3.MoveTowards(transform.localPosition, offsetPosition, Time.deltaTime * 500);
                 yield return null;
             }
-
-            onPosition = true;
-            image.color = Color.white;
         }
 
         private IEnumerator ScaleAndShow()
@@ -87,7 +78,7 @@ namespace Match
 
         private IEnumerator ScaleAndHide()
         {
-            image.color = Color.red;
+            //image.color = Color.red;
             Color color = image.color;
             float scale = 1;
             while (transform.localScale.x > 0)

@@ -90,3 +90,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   image: {fileID: 9215779470539764748}
   type: 0
+  endSpawn: 0
+  onPosition: 1
+  offsetPosition: {x: 72.192, y: 71.756256, z: 0}

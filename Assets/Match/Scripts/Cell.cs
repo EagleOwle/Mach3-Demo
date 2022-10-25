@@ -54,7 +54,6 @@ namespace Match
                 this.item.transform.SetParent(transform);
             }
         }
-
         public Type Type
         {
             get
@@ -118,8 +117,6 @@ namespace Match
         {
             if (item == null) return;
 
-            if (item.onPosition == false) return;
-
             lastCell = FindLastBottom(Bottom);
 
             if (lastCell != null)
@@ -129,27 +126,11 @@ namespace Match
                     Debug.LogError("Cell.Item not empty");
                 }
 
-                //Vector2 bottomPosition = new Vector2(lastCell.transform.position.x + lastCell.Size.x / 2, lastCell.transform.position.y + lastCell.Size.y / 2);
                 lastCell.Item = item;
                 lastCell.Item.MovePosition();
                 item = null;
             }
         }
-
-        //public void Fall(float tweenDuration, ref Sequence sequence)
-        //{
-        //    if (item == null) return;
-
-        //    Cell lastCell = FindLastBottom(Bottom);
-
-        //    if (lastCell != null)
-        //    {
-        //        Vector2 bottomPosition = new Vector2(lastCell.transform.position.x + lastCell.Size.x / 2, lastCell.transform.position.y + lastCell.Size.y / 2);
-        //        sequence.Join(item.transform.DOMove(bottomPosition, tweenDuration));
-        //        lastCell.Item = item;
-        //        item = null;
-        //    }
-        //}
 
         public Cell FindLastBottom(Cell cell)
         {
