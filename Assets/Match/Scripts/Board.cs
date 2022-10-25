@@ -6,9 +6,18 @@ using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using System;
 
 namespace Match
 {
+    public enum State
+    {
+        Start,
+        Spawn,
+        Down,
+        Math
+    }
+
     public class Board : MonoBehaviour
     {
         [SerializeField] private GamePreference gamePreference;
@@ -48,105 +57,174 @@ namespace Match
             UpdateBoard();
         }
 
-        private bool NeedSpawn
+        private void UpdateBoard()
         {
-            get
+            Debug.Log("Update Board");
+
+            if (BoardFull == false)
             {
-                foreach (var cell in firstRow)
-                {
-                    if (cell.Type == Type.None)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        private async void UpdateBoard()
-        {
-            await SpawnItems();
-            FallItem();
-
-            if (NeedSpawn)
-            {
-                UpdateBoard();
+                StartCoroutine(UpdateBoardRoutine());
             }
             else
             {
-                FindMatch();
-                //UpdateBoard();
+                Debug.Log("Board is Full");
             }
         }
 
-        private async Task SpawnItems()
+        private IEnumerator UpdateBoardRoutine()
         {
-            var sequence = DOTween.Sequence();
+            Debug.Log("Start Update Board Routine");
+            while (BoardFull == false)
+            {
+                yield return StartCoroutine(SpawnItemRoutine());
+                FallItem();
+            }
+
+            StartCoroutine(FindMatch());
+        }
+
+        private IEnumerator SpawnItemRoutine()
+        {
+            Debug.Log("Spawn Item");
+            List<Item> waitSpawnItems = new List<Item>();
 
             foreach (var cell in firstRow)
             {
                 if (cell.Type == Type.None)
                 {
-                    cell.SpawnRandomType();
-                    sequence = cell.ScaleEffect(gamePreference.boardSetting.tweenDuration, sequence);
+                    Item item = cell.SpawnRandomType();
+                    waitSpawnItems.Add(item);
                 }
             }
 
-            await sequence.Play().AsyncWaitForCompletion();
-
-        }
-
-        private async void FallItem()
-        {
-            var sequence = DOTween.Sequence();
-
-            for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
+            while (waitSpawnItems.Count > 0)
             {
-                for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
+                for (int i = 0; i < waitSpawnItems.Count; i++)
                 {
-                    cells[x, y].Fall(gamePreference.boardSetting.tweenDuration, ref sequence);
+                    if (waitSpawnItems[i].endSpawn == true)
+                    {
+                        waitSpawnItems.RemoveAt(i);
+                    }
                 }
-            }
 
-            await sequence.Play().AsyncWaitForCompletion();
+                yield return null;
+            }
         }
 
-        private void FindMatch()
+        private IEnumerator FindMatch()
         {
+            Debug.Log("Find Match");
             List<Cell> allCells = new List<Cell>();
 
             for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
             {
                 for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
                 {
-                    List<Cell> tmpCells = new List<Cell>();
-
-                    if (cells[x, y].Type == Type.None) continue;
-
-                    cells[x, y].GetMatchNeigbor(Direction.Top, cells[x, y].Type, tmpCells);
-                    cells[x, y].GetMatchNeigbor(Direction.Right, cells[x, y].Type, tmpCells);
-                    cells[x, y].GetMatchNeigbor(Direction.Bottom, cells[x, y].Type, tmpCells);
-                    cells[x, y].GetMatchNeigbor(Direction.Left, cells[x, y].Type, tmpCells);
-
-                    if (tmpCells.Count > 2)
-                    {
-                        allCells.AddRange(tmpCells);
-                    }
+                    GetMatchDirection(cells[x, y], Direction.Top, allCells);
+                    GetMatchDirection(cells[x, y], Direction.Right, allCells);
+                    GetMatchDirection(cells[x, y], Direction.Bottom, allCells);
+                    GetMatchDirection(cells[x, y], Direction.Left, allCells);
                 }
             }
 
-            for (int i = 0; i < allCells.Count; i++)
+            yield return StartCoroutine(DestroyMatchCell(allCells.ToArray()));
+            
+            UpdateBoard();
+        }
+
+        private void GetMatchDirection(Cell cell, Direction direction, List<Cell> allCells)
+        {
+            List<Cell> tmpCells = new List<Cell>();
+
+            cell.GetMatchNeigbor(direction, cell.Type, tmpCells);
+
+            if (tmpCells.Count > 2)
             {
-                allCells[i].DestroyItem();
+                foreach (var item in tmpCells)
+                {
+                    if (allCells.Contains(item) == false)
+                    {
+                        allCells.Add(item);
+                    }
+                }
             }
         }
 
+        private IEnumerator DestroyMatchCell(Cell[] cells)
+        {
+            Debug.Log("Destroy Cells");
+            List<Cell> waitSpawnItems = new List<Cell>();
+
+            for (int i = 0; i < cells.Length; i++)
+            {
+                cells[i].DestroyItem();
+                waitSpawnItems.Add(cells[i]);
+            }
+
+            while (waitSpawnItems.Count > 0)
+            {
+                for (int i = 0; i < waitSpawnItems.Count; i++)
+                {
+                    if (waitSpawnItems[i].Item == null)
+                    {
+                        waitSpawnItems.RemoveAt(i);
+                    }
+                }
+
+                yield return null;
+            }
+        }
+
+        private bool BoardFull
+        {
+            get
+            {
+                for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
+                {
+                    for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
+                    {
+                        if (cells[x, y].Type == Type.None)
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+        }
+
+        private void FallItem()
+        {
+            Debug.Log("Fall Item");
+
+            for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
+            {
+                for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
+                {
+                    cells[x, y].Fall();
+                }
+            }
+
+        }   
+
         private void Update()
         {
-            if(Input.GetKeyDown(KeyCode.Backspace))
+
+            #region Debug
+            for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
+                {
+                    Type type = cells[x, y].Type;
+                }
+            }
+            #endregion
+
+
+            if (Input.GetKeyDown(KeyCode.Backspace))
+            {
+                SceneManager.LoadScene(SceneManager.GetSceneByBuildIndex(0).name);
             }
         }
 

@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using System.Collections;
+using System;
 
 namespace Match
 {
@@ -37,11 +38,21 @@ namespace Match
         public Cell Bottom;
         public Cell Left;
 
+        public Cell lastCell;
+
         [SerializeField] private Item item;
-        public void SetItem(Item item)
+        public Item Item
         {
-            this.item = item;
-            this.item.transform.SetParent(transform);
+            get
+            {
+                return item;
+            }
+
+            set
+            {
+                this.item = value;
+                this.item.transform.SetParent(transform);
+            }
         }
 
         public Type Type
@@ -65,15 +76,16 @@ namespace Match
 
         private GamePreference preference;
 
-        public void SpawnRandomType()
+        public Item SpawnRandomType()
         {
-            Item item = Instantiate(preference.prefabStore.prefabItem, transform);
-            this.item = item;
-            this.item.Initialise(preference);
-            this.item.SetRandomType();
+            item = Instantiate(preference.prefabStore.prefabItem, transform);
+            item.Initialise(preference);
+            item.SetRandomType();
+            item.StartScaleAndShow();
+            return item;
         }
 
-        public void Initialise(int x, int y,  GamePreference preference, Cell[,] cells)
+        public void Initialise(int x, int y, GamePreference preference, Cell[,] cells)
         {
             this.preference = preference;
             this.x = x;
@@ -102,20 +114,42 @@ namespace Match
             return sequence;
         }
 
-        public void Fall(float tweenDuration, ref Sequence sequence)
+        public void Fall()
         {
             if (item == null) return;
 
-            Cell lastCell = FindLastBottom(Bottom);
+            if (item.onPosition == false) return;
+
+            lastCell = FindLastBottom(Bottom);
 
             if (lastCell != null)
             {
-                Vector2 bottomPosition = new Vector2(lastCell.transform.position.x + lastCell.Size.x / 2, lastCell.transform.position.y + lastCell.Size.y / 2);
-                sequence.Join(item.transform.DOMove(bottomPosition, tweenDuration));
-                lastCell.SetItem(item);
+                if (lastCell.item != null)
+                {
+                    Debug.LogError("Cell.Item not empty");
+                }
+
+                //Vector2 bottomPosition = new Vector2(lastCell.transform.position.x + lastCell.Size.x / 2, lastCell.transform.position.y + lastCell.Size.y / 2);
+                lastCell.Item = item;
+                lastCell.Item.MovePosition();
                 item = null;
             }
         }
+
+        //public void Fall(float tweenDuration, ref Sequence sequence)
+        //{
+        //    if (item == null) return;
+
+        //    Cell lastCell = FindLastBottom(Bottom);
+
+        //    if (lastCell != null)
+        //    {
+        //        Vector2 bottomPosition = new Vector2(lastCell.transform.position.x + lastCell.Size.x / 2, lastCell.transform.position.y + lastCell.Size.y / 2);
+        //        sequence.Join(item.transform.DOMove(bottomPosition, tweenDuration));
+        //        lastCell.Item = item;
+        //        item = null;
+        //    }
+        //}
 
         public Cell FindLastBottom(Cell cell)
         {
@@ -138,11 +172,10 @@ namespace Match
         {
             if (item == null) return;
 
-            CanvasGroup canvasGroup = GameObject.FindObjectOfType<CanvasGroup>();
-            item.transform.SetParent(canvasGroup.transform);
+            //CanvasGroup canvasGroup = GameObject.FindObjectOfType<CanvasGroup>();
+            //item.transform.SetParent(canvasGroup.transform);
             item.StartScaleAndHide();
-            item = null;
-            //ProcessDestroyItem();
+            //item = null;
         }
 
         //private async void ProcessDestroyItem()
@@ -165,7 +198,9 @@ namespace Match
 
         public void GetMatchNeigbor(Direction direction, Type type, List<Cell> tmpCells)
         {
-            if (!tmpCells.Contains(this))
+            if (this.Type == Type.None) return;
+
+            if (tmpCells.Contains(this) == false)
             {
                 tmpCells.Add(this);
             }
@@ -200,8 +235,6 @@ namespace Match
                     Debug.LogError("No direction value: " + direction);
                     break;
             }
-
-            
         }
 
     }
