@@ -43,18 +43,10 @@ namespace Match
             }
         }
 
-        private CancellationTokenSource cancellation;
-
-        private void Awake()
-        {
-            cancellation = new CancellationTokenSource();
-            cancellation.RegisterRaiseCancelOnDestroy(this);
-        }
-
         private void Start()
         {
             boardCreate.Create(gamePreference, out cells, out firstRow);
-            UpdateBoard();
+           // UpdateBoard();
         }
 
         private void UpdateBoard()

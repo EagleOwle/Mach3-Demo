@@ -79,7 +79,7 @@ namespace Match
         public Item SpawnRandomType()
         {
             item = Instantiate(preference.prefabStore.prefabItem, transform);
-            item.Initialise(preference);
+            item.Initialise(preference, Size);
             item.SetRandomType();
             item.StartScaleAndShow();
             return item;

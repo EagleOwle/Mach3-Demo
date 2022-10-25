@@ -16,16 +16,11 @@ namespace Match
 
         public Vector3 offsetPosition;
 
-        private void Awake()
-        {
-            offsetPosition = transform.localPosition;
-        }
-
-        public void Initialise(GamePreference preference)
+        public void Initialise(GamePreference preference, Vector2 size)
         {
             this.preference = preference;
             type = Type.None;
-            image.sprite = preference.GetItemByType(type).sprite;
+            offsetPosition = new Vector2(size.x / 2, size.y / 2);
         }
 
         public void SetRandomType()

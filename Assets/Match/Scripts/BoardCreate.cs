@@ -5,6 +5,8 @@ namespace Match
 {
     public class BoardCreate : MonoBehaviour
     {
+        [SerializeField] private Transform boardParent;
+
         public void Create(GamePreference gamePreference, out Cell[,] cells, out Cell[] firstRow)
         {
             cells = new Cell[gamePreference.boardSetting.sizeX, gamePreference.boardSetting.sizeY];
@@ -32,7 +34,9 @@ namespace Match
             {
                 for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
                 {
-                    cells[x, y].Initialise(x, y, gamePreference, cells);
+                    cells[x, y].transform.SetParent(boardParent);
+                    //cells[x, y].Initialise(x, y, gamePreference, cells);
+                    
                 }
             }
         }
