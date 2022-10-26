@@ -16,6 +16,7 @@ namespace Match
                 for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
                 {
                     Cell cell = Instantiate(gamePreference.prefabStore.prefabCell, transform);
+                    cell.gameObject.name = "Cell" + cell.transform.GetSiblingIndex();
                     cells[x, y] = cell;
 
                     SetLocalPosition(cell, boardSize, x, y);

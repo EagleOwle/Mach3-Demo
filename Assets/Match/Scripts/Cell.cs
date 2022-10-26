@@ -11,6 +11,7 @@ namespace Match
         [SerializeField] private RectTransform rectTransform;
         [SerializeField] private TextMeshProUGUI text;
         [SerializeField] private Button button;
+        [SerializeField] private Image image;
 
         public Type Type
         {
@@ -18,15 +19,15 @@ namespace Match
             {
                 text.transform.SetAsLastSibling();
 
-                if (item == null)
+                if (Item == null)
                 {
                     text.text = "None \n" + boardX + " / " + boardY;
                     return Type.None;
                 }
                 else
                 {
-                    text.text = item.Type + "\n" + boardX + " / " + boardY;
-                    return item.Type;
+                    text.text = Item.Type + "\n" + boardX + " / " + boardY;
+                    return Item.Type;
                 }
             }
         }
@@ -53,18 +54,15 @@ namespace Match
         public Cell Bottom;
         public Cell Left;
 
-        private Item item;
-        public Item Item
+        public Item Item { get; private set; }
+        public Item SetItem
         {
-            get
-            {
-                return item;
-            }
-
             set
             {
-                this.item = value;
-                this.item.transform.SetParent(transform);
+                Item = value;
+                //Item.gameObject.name = "Item/" + this.gameObject.name;
+                Item.transform.SetParent(transform);
+                Item.MovePosition();
             }
         }
         
@@ -84,11 +82,11 @@ namespace Match
 
         public Item SpawnRandomType()
         {
-            item = Instantiate(preference.prefabStore.prefabItem, transform);
-            item.Initialise(preference, Size);
-            item.SetRandomType();
-            item.StartScaleAndShow();
-            return item;
+            Item = Instantiate(preference.prefabStore.prefabItem, transform);
+            Item.Initialise(preference, Size);
+            Item.SetRandomType();
+            Item.StartScaleAndShow();
+            return Item;
         }
 
         private void SetNeiborth(Cell[,] cells)
@@ -101,20 +99,19 @@ namespace Match
 
         public void FallingDown()
         {
-            if (item == null) return;
+            if (Item == null) return;
 
            Cell lastCell = FindTheLatestBelow(Bottom);
 
             if (lastCell != null)
             {
-                if (lastCell.item != null)
+                if (lastCell.Item != null)
                 {
                     Debug.LogError("Cell.Item not empty");
                 }
 
-                lastCell.Item = item;
-                lastCell.Item.MovePosition();
-                item = null;
+                lastCell.SetItem = Item;
+                Item = null;
             }
         }
 
@@ -137,8 +134,8 @@ namespace Match
 
         public void DestroyItem()
         {
-            if (item == null) return;
-            item.StartScaleAndHide();
+            if (Item == null) return;
+            Item.StartScaleAndHide();
         }
 
         public void GetMatchNeigbor(Direction direction, Type type, List<Cell> tmpCells)
@@ -182,21 +179,29 @@ namespace Match
             }
         }
 
+        public bool IsNeighbor(Cell cell)
+        {
+            if (Top == cell) return true;
+            if (Left == cell) return true;
+            if (Right == cell) return true;
+            if (Bottom == cell) return true;
+            return false;
+        }
+
         private void Selected()
         {
-            //Debug.Log("Selected " + boardX + "/" + boardY);
-            if (item == null) return;
+            Item.Selected();
+            selectable.OnSelected(this, out bool isSelect);
 
-            item.Selected();
-            selectable.OnSelected(this);
+            if(isSelect)
+            image.color = Color.white;
         }
 
         public void Deselected()
         {
-            Debug.Log("Cell Deselected " + boardX + "/" + boardY);
-            //if (item == null) return;
-            item.Deselected();
+            Item.Deselected();
             selectable.OnDeselected(this);
+            image.color = Color.black;
         }
 
     }

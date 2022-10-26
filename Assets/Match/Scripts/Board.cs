@@ -12,7 +12,7 @@ namespace Match
 {
     public interface ISelectable
     {
-        void OnSelected(Cell cell);
+        void OnSelected(Cell cell, out bool isSelect);
         void OnDeselected(Cell cell);
     }
 
@@ -42,6 +42,7 @@ namespace Match
         }
 
         private Cell currentSelected;
+        private RevertHandler revertHandler;
 
         private bool BoardIsFull
         {
@@ -60,6 +61,11 @@ namespace Match
 
                 return true;
             }
+        }
+
+        private void Awake()
+        {
+            revertHandler = new RevertHandler();
         }
 
         private void Start()
@@ -90,6 +96,7 @@ namespace Match
             }
             else
             {
+                revertHandler.Revert();
                 Debug.Log("Board is Full");
 
             }
@@ -150,7 +157,7 @@ namespace Match
 
         private IEnumerator FindMatch()
         {
-            //Debug.Log("Find Match");
+            Debug.Log("Find Match");
             List<Cell> allCells = new List<Cell>();
 
             for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
@@ -212,6 +219,13 @@ namespace Match
             }
         }
 
+        private IEnumerator RevertRoutine(Cell cellOne, Cell cellTwo)
+        {
+            revertHandler.SetCells(cellOne, cellTwo);
+            yield return new WaitForSeconds(0.3f);
+            StartCoroutine(FindMatch());
+        }
+
         private void Update()
         {
 
@@ -232,28 +246,43 @@ namespace Match
             }
         }
 
-        public void OnSelected(Cell cell)
+        public void OnSelected(Cell cell, out bool isSelect)
         {
-            Debug.Log("Selelected " + cell.boardPosition.x + "/" + cell.boardPosition.y);
+            //Debug.Log("Selelected " + cell.boardPosition.x + "/" + cell.boardPosition.y);
 
-            Selected = cell;
+            if (currentSelected == cell)
+            {
+                isSelect = false;
+                return ;
+            }
+
+            if (currentSelected != null)
+            {
+                if (currentSelected.IsNeighbor(cell))
+                {
+                    StartCoroutine(RevertRoutine(cell, currentSelected));
+                    
+                    currentSelected.Deselected();
+                    currentSelected = null;
+                    isSelect = false;
+                }
+                else
+                {
+                    currentSelected.Deselected();
+                    currentSelected = cell;
+                    isSelect = true;
+                }
+            }
+            else
+            {
+                currentSelected = cell;
+                isSelect = true;
+            }
         }
 
         public void OnDeselected(Cell cell)
         {
-            Debug.Log("Deselected " + cell.boardPosition.x + "/" + cell.boardPosition.y);
-        }
-
-        private Cell Selected
-        {
-            set
-            {
-                if (currentSelected != value)
-                {
-                    if (currentSelected != null) currentSelected.Deselected();
-                    currentSelected = value;
-                }
-            }
+            //Debug.Log("Deselected " + cell.boardPosition.x + "/" + cell.boardPosition.y);
         }
 
     }

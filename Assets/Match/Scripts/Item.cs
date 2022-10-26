@@ -98,12 +98,12 @@ namespace Match
 
         public void Selected()
         {
-            StartCoroutine(Scale(1.2f));   
+            //StartCoroutine(Scale(1.2f));   
         }
 
         public void Deselected()
         {
-            StartCoroutine(Scale(MoveTowardsDirection.Normal));
+            //StartCoroutine(Scale(MoveTowardsDirection.Normal));
         }
 
         private IEnumerator Scale(MoveTowardsDirection target, Action<float> currentValue = null)
