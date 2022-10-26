@@ -1,22 +1,35 @@
-﻿using DG.Tweening;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using System.Collections;
-using System;
 
 namespace Match
 {
-
     public class Cell : MonoBehaviour
     {
+        [Header("Reference")]
         [SerializeField] private RectTransform rectTransform;
         [SerializeField] private TextMeshProUGUI text;
+        [SerializeField] private Button button;
+
+        public Type Type
+        {
+            get
+            {
+                text.transform.SetAsLastSibling();
+
+                if (item == null)
+                {
+                    text.text = "None \n" + boardX + " / " + boardY;
+                    return Type.None;
+                }
+                else
+                {
+                    text.text = item.Type + "\n" + boardX + " / " + boardY;
+                    return item.Type;
+                }
+            }
+        }
 
         public Vector2 Size
         {
@@ -31,16 +44,16 @@ namespace Match
             }
         }
 
-        private int x, y;
+        private int boardX, boardY;
+        public Vector2 boardPosition => (new Vector2(boardX, boardY));
 
+        [Header("Neiborth")]
         public Cell Top;
         public Cell Right;
         public Cell Bottom;
         public Cell Left;
 
-        public Cell lastCell;
-
-        [SerializeField] private Item item;
+        private Item item;
         public Item Item
         {
             get
@@ -54,26 +67,20 @@ namespace Match
                 this.item.transform.SetParent(transform);
             }
         }
-        public Type Type
-        {
-            get
-            {
-                text.transform.SetAsLastSibling();
-
-                if (item == null)
-                {
-                    text.text = "None \n" + x + " / " + y;
-                    return Type.None;
-                }
-                else
-                {
-                    text.text = item.Type + "\n" + x + " / " + y;
-                    return item.Type;
-                }
-            }
-        }
-
+        
         private GamePreference preference;
+        private ISelectable selectable;
+
+        public void Initialise(int x, int y, GamePreference preference, Cell[,] cells, ISelectable selectable)
+        {
+            this.selectable = selectable;
+            this.preference = preference;
+            this.boardX = x;
+            this.boardY = y;
+            SetNeiborth(cells);
+
+            button.onClick.AddListener(() => Selected());
+        }
 
         public Item SpawnRandomType()
         {
@@ -84,40 +91,19 @@ namespace Match
             return item;
         }
 
-        public void Initialise(int x, int y, GamePreference preference, Cell[,] cells)
-        {
-            this.preference = preference;
-            this.x = x;
-            this.y = y;
-            SetNeiborth(cells);
-        }
-
         private void SetNeiborth(Cell[,] cells)
         {
-            Left = x > 0 ? cells[x - 1, y] : null;
-            Bottom = y > 0 ? cells[x, y - 1] : null;
-            Right = x < cells.GetLength(0) - 1 ? cells[x + 1, y] : null;
-            Top = y < cells.GetLength(1) - 1 ? cells[x, y + 1] : null;
+            Left = boardX > 0 ? cells[boardX - 1, boardY] : null;
+            Bottom = boardY > 0 ? cells[boardX, boardY - 1] : null;
+            Right = boardX < cells.GetLength(0) - 1 ? cells[boardX + 1, boardY] : null;
+            Top = boardY < cells.GetLength(1) - 1 ? cells[boardX, boardY + 1] : null;
         }
 
-        public Sequence ScaleEffect(float tweenDuration, Sequence sequence)
-        {
-            item.transform.localScale = Vector3.zero;
-            sequence.Join(item.transform.DOScale(Vector3.one, tweenDuration));
-            return sequence;
-        }
-
-        public Sequence HalfScaleEffect(float tweenDuration, Sequence sequence)
-        {
-            sequence.Join(item.transform.DOScale(Vector3.one * 0.5f, tweenDuration));
-            return sequence;
-        }
-
-        public void Fall()
+        public void FallingDown()
         {
             if (item == null) return;
 
-            lastCell = FindLastBottom(Bottom);
+           Cell lastCell = FindTheLatestBelow(Bottom);
 
             if (lastCell != null)
             {
@@ -132,14 +118,14 @@ namespace Match
             }
         }
 
-        public Cell FindLastBottom(Cell cell)
+        public Cell FindTheLatestBelow(Cell currentCcell)
         {
             Cell bottom = null;
 
-            if (cell != null && cell.Type == Type.None)
+            if (currentCcell != null && currentCcell.Type == Type.None)
             {
-                bottom = cell;
-                Cell tmp = FindLastBottom(cell.Bottom);
+                bottom = currentCcell;
+                Cell tmp = FindTheLatestBelow(currentCcell.Bottom);
                 if (tmp != null)
                 {
                     bottom = tmp;
@@ -152,30 +138,8 @@ namespace Match
         public void DestroyItem()
         {
             if (item == null) return;
-
-            //CanvasGroup canvasGroup = GameObject.FindObjectOfType<CanvasGroup>();
-            //item.transform.SetParent(canvasGroup.transform);
             item.StartScaleAndHide();
-            //item = null;
         }
-
-        //private async void ProcessDestroyItem()
-        //{
-        //    Item item = this.item;
-        //    this.item = null;
-
-        //    CanvasGroup canvasGroup = GameObject.FindObjectOfType<CanvasGroup>();
-
-        //    item.transform.SetParent(canvasGroup.transform);
-        //    item.transform.SetAsLastSibling();
-        //    canvasGroup.alpha = 1;
-
-        //    var sequence = DOTween.Sequence();
-        //    sequence.Join(canvasGroup.DOFade(0, preference.boardSetting.tweenDuration));
-        //    sequence.Join(item.transform.DOScale(Vector3.one * 1.5f, preference.boardSetting.tweenDuration));
-        //    await sequence.Play().AsyncWaitForCompletion();
-        //    Destroy(item.gameObject);
-        //}
 
         public void GetMatchNeigbor(Direction direction, Type type, List<Cell> tmpCells)
         {
@@ -216,6 +180,23 @@ namespace Match
                     Debug.LogError("No direction value: " + direction);
                     break;
             }
+        }
+
+        private void Selected()
+        {
+            //Debug.Log("Selected " + boardX + "/" + boardY);
+            if (item == null) return;
+
+            item.Selected();
+            selectable.OnSelected(this);
+        }
+
+        public void Deselected()
+        {
+            Debug.Log("Cell Deselected " + boardX + "/" + boardY);
+            //if (item == null) return;
+            item.Deselected();
+            selectable.OnDeselected(this);
         }
 
     }
