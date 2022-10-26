@@ -13,8 +13,6 @@ namespace Match
 
         public bool endSpawn = false;
 
-        public Vector3 offsetPosition;
-
         public void Initialise(GamePreference preference, Vector2 size)
         {
             this.preference = preference;
@@ -45,9 +43,9 @@ namespace Match
 
         private IEnumerator MovePositionRoutine()
         {
-            while (transform.localPosition != offsetPosition)
+            while (transform.localPosition != Vector3.zero)
             {
-                transform.localPosition = Vector3.MoveTowards(transform.localPosition, offsetPosition, Time.deltaTime * 500);
+                transform.localPosition = Vector3.MoveTowards(transform.localPosition, Vector3.zero, Time.deltaTime * 1000);
                 yield return null;
             }
         }
@@ -56,16 +54,16 @@ namespace Match
         {
             Color color = image.color;
             float scale = 0;
+            transform.localScale = Vector3.zero;
+
             while (transform.localScale.x < 1)
             {
                 scale = transform.localScale.x;
-                scale += Time.deltaTime;// * 0.2f;
+                scale += Time.deltaTime * 5;
                 transform.localScale = Vector3.one * scale;
 
-                color = image.color;
-                color.a += Time.deltaTime;// * 0.2f;
+                color.a = transform.localScale.x;
                 image.color = color;
-
                 yield return null;
             }
 

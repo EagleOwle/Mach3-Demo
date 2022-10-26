@@ -62,12 +62,12 @@ namespace Match
 
                 if (item == null)
                 {
-                    text.text = "None";
+                    text.text = "None \n" + x + " / " + y;
                     return Type.None;
                 }
                 else
                 {
-                    text.text = item.Type.ToString();
+                    text.text = item.Type + "\n" + x + " / " + y;
                     return item.Type;
                 }
             }

@@ -5,21 +5,12 @@ namespace Match
 {
     public class BoardCreate : MonoBehaviour
     {
-        [SerializeField] Vector2 sizeOffset;
-
-        private void Start()
-        {
-            sizeOffset = Vector2.one - ((transform as RectTransform).anchorMax - (transform as RectTransform).anchorMin);
-        }
 
         public void Create(GamePreference gamePreference, out Cell[,] cells, out Cell[] firstRow)
         {
+            Vector2 boardSize = new Vector2(gamePreference.boardSetting.sizeX, gamePreference.boardSetting.sizeY);
             cells = new Cell[gamePreference.boardSetting.sizeX, gamePreference.boardSetting.sizeY];
             firstRow = new Cell[gamePreference.boardSetting.sizeX];
-
-            FlexibleGridLayout gridLayout = GetComponent<FlexibleGridLayout>();
-            gridLayout.ColumnCount = gamePreference.boardSetting.sizeX;
-            gridLayout.RowCount = gamePreference.boardSetting.sizeY;
 
             for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
             {
@@ -28,6 +19,8 @@ namespace Match
                     Cell cell = Instantiate(gamePreference.prefabStore.prefabCell, transform);
                     cells[x, y] = cell;
 
+                    SetLocalPosition(cell, boardSize, x, y);
+
                     if (y == gamePreference.boardSetting.sizeY - 1)
                     {
                         firstRow[x] = cell;
@@ -35,23 +28,33 @@ namespace Match
                 }
             }
 
+            CellInitialise(gamePreference, cells);
+        }
+
+        private void SetLocalPosition(Cell cell, Vector2 boardSize, int x, int y)
+        {
+            RectTransform transform = cell.transform as RectTransform;
+            RectTransform parentTransform = this.transform as RectTransform;
+
+            transform.sizeDelta = new Vector2(parentTransform.rect.size.x / boardSize.x,
+                                              parentTransform.rect.size.y / boardSize.y);
+
+            transform.localPosition = new Vector2(((parentTransform.rect.size.x / boardSize.x) * x) + transform.sizeDelta.x/2,
+                                                       ((parentTransform.rect.size.y / boardSize.y) * y) + transform.sizeDelta.y/2);
+        }
+
+        private void CellInitialise(GamePreference gamePreference, Cell[,] cells)
+        {
             for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
             {
                 for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
                 {
                     cells[x, y].Initialise(x, y, gamePreference, cells);
-
-                    Vector2 screenSize = new Vector2(Screen.width, Screen.height);
-                    RectTransform rectTransform = cells[x, y].transform as RectTransform;
-
-                    Vector2 offset = new Vector2(Screen.width / 100 * sizeOffset.x, Screen.width / 100 * sizeOffset.y);
-
-                    rectTransform.sizeDelta = new Vector2(((Screen.width + offset.x) / (gamePreference.boardSetting.sizeX + 1)), ((Screen.height + offset.y) / (gamePreference.boardSetting.sizeY + 1)));
-                    cells[x, y].transform.localPosition = new Vector2((x + sizeOffset.x/2) * (Screen.width / gamePreference.boardSetting.sizeX), 
-                                                                      (y + sizeOffset.y/2) * (Screen.height / gamePreference.boardSetting.sizeY));
                 }
             }
         }
+
+        
 
     }
 }

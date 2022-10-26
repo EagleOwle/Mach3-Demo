@@ -38,12 +38,12 @@ namespace Match
         private void Start()
         {
             boardCreate.Create(gamePreference, out cells, out firstRow);
-           // UpdateBoard();
+            UpdateBoard();
         }
 
         private void UpdateBoard()
         {
-            Debug.Log("Update Board");
+            //Debug.Log("Update Board");
 
             if (BoardFull == false)
             {
@@ -57,19 +57,19 @@ namespace Match
 
         private IEnumerator UpdateBoardRoutine()
         {
-            Debug.Log("Start Update Board Routine");
+            //Debug.Log("Start Update Board Routine");
             while (BoardFull == false)
             {
-                FallItem();
                 yield return StartCoroutine(SpawnItemRoutine());
+                FallItem();
             }
-            
-            //StartCoroutine(FindMatch());
+
+            StartCoroutine(FindMatch());
         }
 
         private IEnumerator SpawnItemRoutine()
         {
-            Debug.Log("Spawn Item");
+            //Debug.Log("Spawn Item");
             List<Item> waitSpawnItems = new List<Item>();
 
             foreach (var cell in firstRow)
@@ -90,29 +90,14 @@ namespace Match
                         waitSpawnItems.RemoveAt(i);
                     }
                 }
+
+                yield return null;
             }
-
-            yield return null;// StartCoroutine(FallItemRoutine());
-        }
-
-        private IEnumerator FallItemRoutine()
-        {
-            Debug.Log("Fall Item");
-
-            for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
-            {
-                for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
-                {
-                    cells[x, y].Fall();
-                }
-            }
-
-            yield return null;
         }
 
         private IEnumerator FindMatch()
         {
-            Debug.Log("Find Match");
+            //Debug.Log("Find Match");
             List<Cell> allCells = new List<Cell>();
 
             for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
@@ -127,7 +112,7 @@ namespace Match
             }
 
             yield return StartCoroutine(DestroyMatchCell(allCells.ToArray()));
-            
+
             UpdateBoard();
         }
 
@@ -151,7 +136,7 @@ namespace Match
 
         private IEnumerator DestroyMatchCell(Cell[] cells)
         {
-            Debug.Log("Destroy Cells");
+            //Debug.Log("Destroy Cells");
             List<Cell> waitSpawnItems = new List<Cell>();
 
             for (int i = 0; i < cells.Length; i++)
@@ -195,7 +180,7 @@ namespace Match
 
         private void FallItem()
         {
-            Debug.Log("Fall Item");
+            //Debug.Log("Fall Item");
 
             for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
             {
@@ -204,7 +189,7 @@ namespace Match
                     cells[x, y].Fall();
                 }
             }
-        }   
+        }
 
         private void Update()
         {
