@@ -1,22 +1,36 @@
-﻿using DG.Tweening;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using System.Collections;
-using System;
 
 namespace Match
 {
-
     public class Cell : MonoBehaviour
     {
+        [Header("Reference")]
         [SerializeField] private RectTransform rectTransform;
         [SerializeField] private TextMeshProUGUI text;
+        [SerializeField] private Button button;
+        [SerializeField] private Image image;
+
+        public Type Type
+        {
+            get
+            {
+                text.transform.SetAsLastSibling();
+
+                if (Item == null)
+                {
+                    text.text = "None \n" + boardX + " / " + boardY;
+                    return Type.None;
+                }
+                else
+                {
+                    text.text = Item.Type + "\n" + boardX + " / " + boardY;
+                    return Item.Type;
+                }
+            }
+        }
 
         public Vector2 Size
         {
@@ -31,115 +45,84 @@ namespace Match
             }
         }
 
-        private int x, y;
+        private int boardX, boardY;
+        public Vector2 boardPosition => (new Vector2(boardX, boardY));
 
+        [Header("Neiborth")]
         public Cell Top;
         public Cell Right;
         public Cell Bottom;
         public Cell Left;
 
-        public Cell lastCell;
-
-        [SerializeField] private Item item;
-        public Item Item
+        public Item Item { get; private set; }
+        public Item SetItem
         {
-            get
-            {
-                return item;
-            }
-
             set
             {
-                this.item = value;
-                this.item.transform.SetParent(transform);
+                Item = value;
+                //Item.gameObject.name = "Item/" + this.gameObject.name;
+                Item.transform.SetParent(transform);
+                Item.MovePosition();
             }
         }
-        public Type Type
-        {
-            get
-            {
-                text.transform.SetAsLastSibling();
-
-                if (item == null)
-                {
-                    text.text = "None \n" + x + " / " + y;
-                    return Type.None;
-                }
-                else
-                {
-                    text.text = item.Type + "\n" + x + " / " + y;
-                    return item.Type;
-                }
-            }
-        }
-
+        
         private GamePreference preference;
+        private ISelectable selectable;
+
+        public void Initialise(int x, int y, GamePreference preference, Cell[,] cells, ISelectable selectable)
+        {
+            this.selectable = selectable;
+            this.preference = preference;
+            this.boardX = x;
+            this.boardY = y;
+            SetNeiborth(cells);
+
+            button.onClick.AddListener(() => Selected());
+        }
 
         public Item SpawnRandomType()
         {
-            item = Instantiate(preference.prefabStore.prefabItem, transform);
-            item.Initialise(preference, Size);
-            item.SetRandomType();
-            item.StartScaleAndShow();
-            return item;
-        }
-
-        public void Initialise(int x, int y, GamePreference preference, Cell[,] cells)
-        {
-            this.preference = preference;
-            this.x = x;
-            this.y = y;
-            SetNeiborth(cells);
+            Item = Instantiate(preference.prefabStore.prefabItem, transform);
+            Item.Initialise(preference, Size);
+            Item.SetRandomType();
+            Item.StartScaleAndShow();
+            return Item;
         }
 
         private void SetNeiborth(Cell[,] cells)
         {
-            Left = x > 0 ? cells[x - 1, y] : null;
-            Bottom = y > 0 ? cells[x, y - 1] : null;
-            Right = x < cells.GetLength(0) - 1 ? cells[x + 1, y] : null;
-            Top = y < cells.GetLength(1) - 1 ? cells[x, y + 1] : null;
+            Left = boardX > 0 ? cells[boardX - 1, boardY] : null;
+            Bottom = boardY > 0 ? cells[boardX, boardY - 1] : null;
+            Right = boardX < cells.GetLength(0) - 1 ? cells[boardX + 1, boardY] : null;
+            Top = boardY < cells.GetLength(1) - 1 ? cells[boardX, boardY + 1] : null;
         }
 
-        public Sequence ScaleEffect(float tweenDuration, Sequence sequence)
+        public void FallingDown()
         {
-            item.transform.localScale = Vector3.zero;
-            sequence.Join(item.transform.DOScale(Vector3.one, tweenDuration));
-            return sequence;
-        }
+            if (Item == null) return;
 
-        public Sequence HalfScaleEffect(float tweenDuration, Sequence sequence)
-        {
-            sequence.Join(item.transform.DOScale(Vector3.one * 0.5f, tweenDuration));
-            return sequence;
-        }
-
-        public void Fall()
-        {
-            if (item == null) return;
-
-            lastCell = FindLastBottom(Bottom);
+           Cell lastCell = FindTheLatestBelow(Bottom);
 
             if (lastCell != null)
             {
-                if (lastCell.item != null)
+                if (lastCell.Item != null)
                 {
                     Debug.LogError("Cell.Item not empty");
                 }
 
-                lastCell.Item = item;
-                lastCell.Item.MovePosition();
-                item = null;
+                lastCell.SetItem = Item;
+                Item = null;
             }
         }
 
-        public Cell FindLastBottom(Cell cell)
+        public Cell FindTheLatestBelow(Cell currentCcell)
         {
             Cell bottom = null;
 
-            if (cell != null && cell.Type == Type.None)
+            if (currentCcell != null && currentCcell.Type == Type.None)
             {
-                bottom = cell;
-                Cell tmp = FindLastBottom(cell.Bottom);
+                bottom = currentCcell;
+                Cell tmp = FindTheLatestBelow(currentCcell.Bottom);
                 if (tmp != null)
                 {
                     bottom = tmp;
@@ -151,31 +134,9 @@ namespace Match
 
         public void DestroyItem()
         {
-            if (item == null) return;
-
-            //CanvasGroup canvasGroup = GameObject.FindObjectOfType<CanvasGroup>();
-            //item.transform.SetParent(canvasGroup.transform);
-            item.StartScaleAndHide();
-            //item = null;
+            if (Item == null) return;
+            Item.StartScaleAndHide();
         }
-
-        //private async void ProcessDestroyItem()
-        //{
-        //    Item item = this.item;
-        //    this.item = null;
-
-        //    CanvasGroup canvasGroup = GameObject.FindObjectOfType<CanvasGroup>();
-
-        //    item.transform.SetParent(canvasGroup.transform);
-        //    item.transform.SetAsLastSibling();
-        //    canvasGroup.alpha = 1;
-
-        //    var sequence = DOTween.Sequence();
-        //    sequence.Join(canvasGroup.DOFade(0, preference.boardSetting.tweenDuration));
-        //    sequence.Join(item.transform.DOScale(Vector3.one * 1.5f, preference.boardSetting.tweenDuration));
-        //    await sequence.Play().AsyncWaitForCompletion();
-        //    Destroy(item.gameObject);
-        //}
 
         public void GetMatchNeigbor(Direction direction, Type type, List<Cell> tmpCells)
         {
@@ -216,6 +177,31 @@ namespace Match
                     Debug.LogError("No direction value: " + direction);
                     break;
             }
+        }
+
+        public bool IsNeighbor(Cell cell)
+        {
+            if (Top == cell) return true;
+            if (Left == cell) return true;
+            if (Right == cell) return true;
+            if (Bottom == cell) return true;
+            return false;
+        }
+
+        private void Selected()
+        {
+            Item.Selected();
+            selectable.OnSelected(this, out bool isSelect);
+
+            if(isSelect)
+            image.color = Color.white;
+        }
+
+        public void Deselected()
+        {
+            Item.Deselected();
+            selectable.OnDeselected(this);
+            image.color = Color.black;
         }
 
     }

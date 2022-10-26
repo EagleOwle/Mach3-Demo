@@ -10,7 +10,13 @@ using System;
 
 namespace Match
 {
-    public class Board : MonoBehaviour
+    public interface ISelectable
+    {
+        void OnSelected(Cell cell, out bool isSelect);
+        void OnDeselected(Cell cell);
+    }
+
+    public class Board : MonoBehaviour, ISelectable
     {
         [SerializeField] private GamePreference gamePreference;
         [SerializeField] private BoardCreate boardCreate;
@@ -35,30 +41,71 @@ namespace Match
             }
         }
 
+        private Cell currentSelected;
+        private RevertHandler revertHandler;
+
+        private bool BoardIsFull
+        {
+            get
+            {
+                for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
+                {
+                    for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
+                    {
+                        if (cells[x, y].Type == Type.None)
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+        }
+
+        private void Awake()
+        {
+            revertHandler = new RevertHandler();
+        }
+
         private void Start()
         {
             boardCreate.Create(gamePreference, out cells, out firstRow);
+            CellInitialise(gamePreference, cells);
             UpdateBoard();
+        }
+
+        private void CellInitialise(GamePreference gamePreference, Cell[,] cells)
+        {
+            for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
+            {
+                for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
+                {
+                    cells[x, y].Initialise(x, y, gamePreference, cells, this as ISelectable);
+                }
+            }
         }
 
         private void UpdateBoard()
         {
             //Debug.Log("Update Board");
 
-            if (BoardFull == false)
+            if (BoardIsFull == false)
             {
                 StartCoroutine(UpdateBoardRoutine());
             }
             else
             {
+                revertHandler.Revert();
                 Debug.Log("Board is Full");
+
             }
         }
 
         private IEnumerator UpdateBoardRoutine()
         {
             //Debug.Log("Start Update Board Routine");
-            while (BoardFull == false)
+            while (BoardIsFull == false)
             {
                 yield return StartCoroutine(SpawnItemRoutine());
                 FallItem();
@@ -95,9 +142,22 @@ namespace Match
             }
         }
 
+        private void FallItem()
+        {
+            //Debug.Log("Fall Item");
+
+            for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
+            {
+                for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
+                {
+                    cells[x, y].FallingDown();
+                }
+            }
+        }
+
         private IEnumerator FindMatch()
         {
-            //Debug.Log("Find Match");
+            Debug.Log("Find Match");
             List<Cell> allCells = new List<Cell>();
 
             for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
@@ -159,36 +219,11 @@ namespace Match
             }
         }
 
-        private bool BoardFull
+        private IEnumerator RevertRoutine(Cell cellOne, Cell cellTwo)
         {
-            get
-            {
-                for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
-                {
-                    for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
-                    {
-                        if (cells[x, y].Type == Type.None)
-                        {
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
-            }
-        }
-
-        private void FallItem()
-        {
-            //Debug.Log("Fall Item");
-
-            for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
-            {
-                for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
-                {
-                    cells[x, y].Fall();
-                }
-            }
+            revertHandler.SetCells(cellOne, cellTwo);
+            yield return new WaitForSeconds(0.3f);
+            StartCoroutine(FindMatch());
         }
 
         private void Update()
@@ -209,6 +244,45 @@ namespace Match
             {
                 SceneManager.LoadScene(SceneManager.GetSceneByBuildIndex(0).name);
             }
+        }
+
+        public void OnSelected(Cell cell, out bool isSelect)
+        {
+            //Debug.Log("Selelected " + cell.boardPosition.x + "/" + cell.boardPosition.y);
+
+            if (currentSelected == cell)
+            {
+                isSelect = false;
+                return ;
+            }
+
+            if (currentSelected != null)
+            {
+                if (currentSelected.IsNeighbor(cell))
+                {
+                    StartCoroutine(RevertRoutine(cell, currentSelected));
+                    
+                    currentSelected.Deselected();
+                    currentSelected = null;
+                    isSelect = false;
+                }
+                else
+                {
+                    currentSelected.Deselected();
+                    currentSelected = cell;
+                    isSelect = true;
+                }
+            }
+            else
+            {
+                currentSelected = cell;
+                isSelect = true;
+            }
+        }
+
+        public void OnDeselected(Cell cell)
+        {
+            //Debug.Log("Deselected " + cell.boardPosition.x + "/" + cell.boardPosition.y);
         }
 
     }
