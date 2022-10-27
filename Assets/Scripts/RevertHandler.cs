@@ -25,7 +25,7 @@ namespace Match
             if (cellOne == null || cellTwo == null) return;
 
 
-            if (Consilience(itemOne, itemOne))
+            if (Consilience(itemOne, itemTwo))
             {
                 StartRevert();
                 Clear();
