@@ -13,7 +13,6 @@ namespace Match
     public interface ISelectable
     {
         void OnSelected(Cell cell, out bool isSelect);
-        void OnDeselected(Cell cell);
     }
 
     public class Board : MonoBehaviour, ISelectable
@@ -23,23 +22,6 @@ namespace Match
 
         [SerializeField] private Cell[,] cells;
         [SerializeField] private Cell[] firstRow;
-
-        private BoardSetting Setting
-        {
-            get
-            {
-                return gamePreference.boardSetting;
-            }
-        }
-        private PrefabStore Prefabs
-        {
-            get
-            {
-                return gamePreference.prefabStore;
-
-
-            }
-        }
 
         private Cell currentSelected;
         private RevertHandler revertHandler;
@@ -88,8 +70,6 @@ namespace Match
 
         private void UpdateBoard()
         {
-            //Debug.Log("Update Board");
-
             if (BoardIsFull == false)
             {
                 StartCoroutine(UpdateBoardRoutine());
@@ -104,7 +84,6 @@ namespace Match
 
         private IEnumerator UpdateBoardRoutine()
         {
-            //Debug.Log("Start Update Board Routine");
             while (BoardIsFull == false)
             {
                 yield return StartCoroutine(SpawnItemRoutine());
@@ -116,7 +95,6 @@ namespace Match
 
         private IEnumerator SpawnItemRoutine()
         {
-            //Debug.Log("Spawn Item");
             List<Item> waitSpawnItems = new List<Item>();
 
             foreach (var cell in firstRow)
@@ -144,8 +122,6 @@ namespace Match
 
         private void FallItem()
         {
-            //Debug.Log("Fall Item");
-
             for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
             {
                 for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
@@ -157,38 +133,37 @@ namespace Match
 
         private IEnumerator FindMatch()
         {
-            Debug.Log("Find Match");
-            List<Cell> allCells = new List<Cell>();
+            List<Cell> matchCells = new List<Cell>();
 
             for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
             {
                 for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
                 {
-                    GetMatchDirection(cells[x, y], Direction.Top, allCells);
-                    GetMatchDirection(cells[x, y], Direction.Right, allCells);
-                    GetMatchDirection(cells[x, y], Direction.Bottom, allCells);
-                    GetMatchDirection(cells[x, y], Direction.Left, allCells);
+                    CheckMatchDirection(cells[x, y], Direction.Top, matchCells);
+                    CheckMatchDirection(cells[x, y], Direction.Right, matchCells);
+                    CheckMatchDirection(cells[x, y], Direction.Bottom, matchCells);
+                    CheckMatchDirection(cells[x, y], Direction.Left, matchCells);
                 }
             }
 
-            yield return StartCoroutine(DestroyMatchCell(allCells.ToArray()));
+            yield return StartCoroutine(DestroyMatchCell(matchCells.ToArray()));
 
             UpdateBoard();
         }
 
-        private void GetMatchDirection(Cell cell, Direction direction, List<Cell> allCells)
+        private void CheckMatchDirection(Cell cell, Direction direction, List<Cell> matchCells)
         {
             List<Cell> tmpCells = new List<Cell>();
 
             cell.GetMatchNeigbor(direction, cell.Type, tmpCells);
 
-            if (tmpCells.Count > 2)
+            if (tmpCells.Count >= gamePreference.boardSetting.minMatchCount)
             {
                 foreach (var item in tmpCells)
                 {
-                    if (allCells.Contains(item) == false)
+                    if (matchCells.Contains(item) == false)
                     {
-                        allCells.Add(item);
+                        matchCells.Add(item);
                     }
                 }
             }
@@ -221,9 +196,43 @@ namespace Match
 
         private IEnumerator RevertRoutine(Cell cellOne, Cell cellTwo)
         {
-            revertHandler.SetCells(cellOne, cellTwo);
+            revertHandler.SetRevert(cellOne, cellTwo);
             yield return new WaitForSeconds(0.3f);
             StartCoroutine(FindMatch());
+        }
+
+        public void OnSelected(Cell cell, out bool isSelect)
+        {
+            //Debug.Log("Selelected " + cell.boardPosition.x + "/" + cell.boardPosition.y);
+
+            if (currentSelected == cell)
+            {
+                isSelect = false;
+                return;
+            }
+
+            if (currentSelected != null)
+            {
+                if (currentSelected.IsNeighbor(cell))
+                {
+                    StartCoroutine(RevertRoutine(cell, currentSelected));
+
+                    currentSelected.Deselected();
+                    currentSelected = null;
+                    isSelect = false;
+                }
+                else
+                {
+                    currentSelected.Deselected();
+                    currentSelected = cell;
+                    isSelect = true;
+                }
+            }
+            else
+            {
+                currentSelected = cell;
+                isSelect = true;
+            }
         }
 
         private void Update()
@@ -245,45 +254,6 @@ namespace Match
                 SceneManager.LoadScene(SceneManager.GetSceneByBuildIndex(0).name);
             }
         }
-
-        public void OnSelected(Cell cell, out bool isSelect)
-        {
-            //Debug.Log("Selelected " + cell.boardPosition.x + "/" + cell.boardPosition.y);
-
-            if (currentSelected == cell)
-            {
-                isSelect = false;
-                return ;
-            }
-
-            if (currentSelected != null)
-            {
-                if (currentSelected.IsNeighbor(cell))
-                {
-                    StartCoroutine(RevertRoutine(cell, currentSelected));
-                    
-                    currentSelected.Deselected();
-                    currentSelected = null;
-                    isSelect = false;
-                }
-                else
-                {
-                    currentSelected.Deselected();
-                    currentSelected = cell;
-                    isSelect = true;
-                }
-            }
-            else
-            {
-                currentSelected = cell;
-                isSelect = true;
-            }
-        }
-
-        public void OnDeselected(Cell cell)
-        {
-            //Debug.Log("Deselected " + cell.boardPosition.x + "/" + cell.boardPosition.y);
-        }
-
+       
     }
 }

@@ -11,7 +11,7 @@ namespace Match
         private Cell cellTwo;
         private Item itemTwo;
 
-        public void SetCells(Cell cellOne, Cell cellTwo)
+        public void SetRevert(Cell cellOne, Cell cellTwo)
         {
             this.cellOne = cellOne;
             this.cellTwo = cellTwo;
@@ -23,17 +23,11 @@ namespace Match
 
         public void Revert()
         {
-            Debug.Log("RevertCell");
+            if (cellOne == null || cellTwo == null) return;
 
-            if (cellOne == null || cellTwo == null)
-            {
-                Debug.Log("Revert is null");
-                return;
-            }
 
-            if (Consilience(cellOne, itemOne) && Consilience(cellTwo, itemTwo))
+            if (Consilience(itemOne, itemOne))
             {
-                Debug.Log("Revert Consilience");
                 StartRevert();
                 Clear();
             }
@@ -45,17 +39,16 @@ namespace Match
 
         private void StartRevert()
         {
-            Debug.Log("StartRevert");
             cellOne.SetItem = itemTwo;
             cellTwo.SetItem = itemOne;
             itemOne = cellOne.Item;
             itemTwo = cellTwo.Item;
-            
+
         }
 
-        public bool Consilience(Cell cell, Item item)
+        private bool Consilience(Item itemOne, Item itemTwo)
         {
-            if (item == null)
+            if (itemOne == null || itemTwo == null)
             {
                 return false;
             }

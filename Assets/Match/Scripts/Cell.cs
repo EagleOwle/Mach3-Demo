@@ -200,7 +200,6 @@ namespace Match
         public void Deselected()
         {
             Item.Deselected();
-            selectable.OnDeselected(this);
             image.color = Color.black;
         }
 
