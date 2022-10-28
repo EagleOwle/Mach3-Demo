@@ -14,8 +14,6 @@ namespace Match
         public Type Type => type;
         private GamePreference preference;
 
-        public bool endSpawn = false;
-
         public void Initialise(GamePreference preference, Vector2 size)
         {
             this.preference = preference;
@@ -36,12 +34,17 @@ namespace Match
 
         public void StartScaleAndShow()
         {
-            StartCoroutine(ScaleAndShow());
+            StartCoroutine(ScaleAndShow(EndSpawn));
         }
 
         public void MovePosition()
         {
             StartCoroutine(MovePositionRoutine());
+        }
+
+        private void EndSpawn()
+        {
+
         }
 
         private IEnumerator MovePositionRoutine()
@@ -53,10 +56,10 @@ namespace Match
             }
         }
 
-        private IEnumerator ScaleAndShow()
+        private IEnumerator ScaleAndShow(Action endSpawn)
         {
             yield return StartCoroutine(Scale(MoveTowardsDirection.Normal, SetAlpha));
-            endSpawn = true;
+            endSpawn();
         }
 
         private void SetAlpha(float value)

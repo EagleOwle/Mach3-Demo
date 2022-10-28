@@ -5,6 +5,10 @@ using System.Collections.Generic;
 
 namespace Match
 {
+    public interface IEndProcessListener
+    {
+        public void EndProcess();
+    }
 
     public enum GameState
     {
@@ -15,7 +19,7 @@ namespace Match
         PlayerInput
     }
 
-    public class Board : MonoBehaviour, ISelectable
+    public class Board : MonoBehaviour, ISelectable, IEndProcessListener
     {
         [SerializeField] private GamePreference gamePreference;
         [SerializeField] private BoardCreate boardCreate;
@@ -24,7 +28,20 @@ namespace Match
         [SerializeField] private Cell[] firstRow;
 
         private Cell currentSelected;
-        private RevertHandler revertHandler;
+        private ReplacementHandler replacement;
+        private ProcessHandler processHandler;
+
+        private List<Cell> matchCells = new List<Cell>();
+
+        private GameState nextState;
+        private GameState NextState
+        {
+            set
+            {
+                nextState = value;
+                Invoke(nameof(ChangeState), 0.1f);
+            }
+        }
 
         private bool BoardIsFull
         {
@@ -47,25 +64,28 @@ namespace Match
 
         private void Awake()
         {
-            revertHandler = new RevertHandler();
+            replacement = new ReplacementHandler();
+            processHandler = new ProcessHandler(this as IEndProcessListener, gamePreference.boardSetting);
         }
 
         private void Start()
         {
             boardCreate.Create(gamePreference, out cells, this as ISelectable, out firstRow);
-            UpdateBoard();
+            //UpdateBoard();
+            NextState = GameState.SpawnItem;
         }   
 
         private void UpdateBoard()
         {
             if (BoardIsFull == false)
             {
-                StartCoroutine(UpdateBoardRoutine());
+                //StartCoroutine(UpdateBoardRoutine());
+                SpawnItem();
             }
             else
             {
-                revertHandler.Revert();
-                Debug.Log("Board is Full");
+                //replacement.Revert();
+                //Debug.Log("Board is Full");
 
             }
         }
@@ -78,7 +98,19 @@ namespace Match
                 FallItem();
             }
 
-            StartCoroutine(FindMatch());
+            StartCoroutine(FindMatchRoutine());
+        }
+
+        private void SpawnItem()
+        {
+            foreach (var cell in firstRow)
+            {
+                if (cell.Type == Type.None)
+                {
+                    Item item = cell.SpawnRandomType(out ProcessSpawn process);
+                    processHandler.AddProcess(process);
+                }
+            }
         }
 
         private IEnumerator SpawnItemRoutine()
@@ -89,7 +121,8 @@ namespace Match
             {
                 if (cell.Type == Type.None)
                 {
-                    Item item = cell.SpawnRandomType();
+                    Item item = cell.SpawnRandomType(out ProcessSpawn process);
+                    processHandler.AddProcess(process);
                     waitSpawnItems.Add(item);
                 }
             }
@@ -98,10 +131,10 @@ namespace Match
             {
                 for (int i = 0; i < waitSpawnItems.Count; i++)
                 {
-                    if (waitSpawnItems[i].endSpawn == true)
-                    {
-                        waitSpawnItems.RemoveAt(i);
-                    }
+                    //if (waitSpawnItems[i].endSpawn == true)
+                    //{
+                    //    waitSpawnItems.RemoveAt(i);
+                    //}
                 }
 
                 yield return null;
@@ -119,7 +152,7 @@ namespace Match
             }
         }
 
-        private IEnumerator FindMatch()
+        private List<Cell> FindMatch()
         {
             List<Cell> matchCells = new List<Cell>();
 
@@ -134,7 +167,25 @@ namespace Match
                 }
             }
 
-            yield return StartCoroutine(DestroyMatchCell(matchCells.ToArray()));
+            return matchCells;
+        }
+
+        private IEnumerator FindMatchRoutine()
+        {
+            List<Cell> matchCells = new List<Cell>();
+
+            for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
+            {
+                for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
+                {
+                    CheckMatchDirection(cells[x, y], Direction.Top, matchCells);
+                    CheckMatchDirection(cells[x, y], Direction.Right, matchCells);
+                    CheckMatchDirection(cells[x, y], Direction.Bottom, matchCells);
+                    CheckMatchDirection(cells[x, y], Direction.Left, matchCells);
+                }
+            }
+
+            yield return StartCoroutine(DestroyMatchCellRoutine(matchCells.ToArray()));
 
             UpdateBoard();
         }
@@ -157,7 +208,16 @@ namespace Match
             }
         }
 
-        private IEnumerator DestroyMatchCell(Cell[] cells)
+        private void DestroyMatchItem(List<Cell> cells)
+        {
+            for (int i = 0; i < cells.Count; i++)
+            {
+                cells[i].DestroyItem();
+                cells.RemoveAt(i);
+            }
+        }
+
+        private IEnumerator DestroyMatchCellRoutine(Cell[] cells)
         {
             //Debug.Log("Destroy Cells");
             List<Cell> waitSpawnItems = new List<Cell>();
@@ -182,11 +242,11 @@ namespace Match
             }
         }
 
-        private IEnumerator RevertRoutine(Cell cellOne, Cell cellTwo)
+        private IEnumerator ReplacementRoutine(Cell cellOne, Cell cellTwo)
         {
-            revertHandler.SetRevert(cellOne, cellTwo);
+            replacement.Replace(cellOne, cellTwo);
             yield return new WaitForSeconds(0.3f);
-            StartCoroutine(FindMatch());
+            StartCoroutine(FindMatchRoutine());
         }
 
         public void OnSelected(Cell cell, out bool isSelect)
@@ -203,7 +263,7 @@ namespace Match
             {
                 if (currentSelected.IsNeighbor(cell))
                 {
-                    StartCoroutine(RevertRoutine(cell, currentSelected));
+                    StartCoroutine(ReplacementRoutine(cell, currentSelected));
 
                     currentSelected.Deselected();
                     currentSelected = null;
@@ -242,6 +302,61 @@ namespace Match
                 SceneManager.LoadScene(SceneManager.GetSceneByBuildIndex(0).name);
             }
         }
-       
+
+        public void ChangeState()
+        {
+            Debug.Log("ChangeState: " + nextState);
+            switch (nextState)
+            {
+                case GameState.SpawnItem:
+                    SpawnItem();
+                    break;
+
+                case GameState.FalldownItem:
+                    FallItem();
+                    if(BoardIsFull == false)
+                    {
+                        NextState = GameState.SpawnItem;
+                    }
+                    else
+                    {
+                        NextState = GameState.FindMatchItem;
+                    }
+
+                    break;
+                case GameState.FindMatchItem:
+
+                    matchCells = FindMatch();
+
+                    if(matchCells.Count > 0)
+                    {
+                        NextState = GameState.DestroyMatchItem;
+                    }
+                    else
+                    {
+                        NextState = GameState.PlayerInput;
+                    }
+
+                    break;
+                case GameState.DestroyMatchItem:
+
+                    DestroyMatchItem(matchCells);
+                    NextState = GameState.FalldownItem;
+
+                    break;
+                case GameState.PlayerInput:
+                    Debug.Break();
+                    break;
+                default:
+                    Debug.LogError("No State in enum");
+                    break;
+            }
+            
+        }
+
+        public void EndProcess()
+        {
+            NextState = GameState.FalldownItem;
+        }
     }
 }

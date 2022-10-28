@@ -3,21 +3,21 @@
 namespace Match
 {
     [System.Serializable]
-    public class RevertHandler
+    public class ReplacementHandler
     {
         private Cell cellOne;
         private Item itemOne;
         private Cell cellTwo;
         private Item itemTwo;
 
-        public void SetRevert(Cell cellOne, Cell cellTwo)
+        public void Replace(Cell cellOne, Cell cellTwo)
         {
             this.cellOne = cellOne;
             this.cellTwo = cellTwo;
             this.itemOne = cellOne.Item;
             this.itemTwo = cellTwo.Item;
 
-            StartRevert();
+            Replacement();
         }
 
         public void Revert()
@@ -27,7 +27,7 @@ namespace Match
 
             if (Consilience(itemOne, itemTwo))
             {
-                StartRevert();
+                Replacement();
                 Clear();
             }
             else
@@ -36,7 +36,7 @@ namespace Match
             }
         }
 
-        private void StartRevert()
+        private void Replacement()
         {
             cellOne.SetItem = itemTwo;
             cellTwo.SetItem = itemOne;

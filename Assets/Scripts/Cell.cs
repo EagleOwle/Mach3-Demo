@@ -79,12 +79,13 @@ namespace Match
             button.onClick.AddListener(() => Selected());
         }
 
-        public Item SpawnRandomType()
+        public Item SpawnRandomType(out ProcessSpawn process)
         {
             Item = Instantiate(preference.prefabStore.prefabItem, transform);
+            process = Item.gameObject.AddComponent<ProcessSpawn>();
             Item.Initialise(preference, Size);
             Item.SetRandomType();
-            Item.StartScaleAndShow();
+            //Item.StartScaleAndShow();
             return Item;
         }
 
@@ -114,14 +115,14 @@ namespace Match
             }
         }
 
-        public Cell FindTheLatestBelow(Cell currentCcell)
+        public Cell FindTheLatestBelow(Cell currentCell)
         {
             Cell bottom = null;
 
-            if (currentCcell != null && currentCcell.Type == Type.None)
+            if (currentCell != null && currentCell.Type == Type.None)
             {
-                bottom = currentCcell;
-                Cell tmp = FindTheLatestBelow(currentCcell.Bottom);
+                bottom = currentCell;
+                Cell tmp = FindTheLatestBelow(currentCell.Bottom);
                 if (tmp != null)
                 {
                     bottom = tmp;
