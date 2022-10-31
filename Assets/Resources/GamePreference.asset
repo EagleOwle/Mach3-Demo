@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: GamePreference
   m_EditorClassIdentifier: 
   boardSetting:
-    tweenDuration: 5
+    durationScale: 5
+    durationMove: 3
+    minMatchCount: 3
     sizeX: 5
     sizeY: 8
     boardOffsetX: 100

@@ -67,11 +67,13 @@ namespace Match
         
         private GamePreference preference;
         private ISelectable selectable;
+        private IGameState gameState;
 
-        public void Initialise(int x, int y, GamePreference preference, Cell[,] cells, ISelectable selectable)
+        public void Initialise(int x, int y, GamePreference preference, Cell[,] cells, ISelectable selectable, IGameState gameState)
         {
             this.selectable = selectable;
             this.preference = preference;
+            this.gameState = gameState;
             this.boardX = x;
             this.boardY = y;
             SetNeiborth(cells);
@@ -132,10 +134,15 @@ namespace Match
             return bottom;
         }
 
-        public void DestroyItem()
+        public void DestroyItem(out ProcessDestroy process)
         {
-            if (Item == null) return;
-            Item.StartScaleAndHide();
+            if(Item == null)
+            {
+                Debug.LogError("Item is null");
+            }
+
+            //Item.StartScaleAndHide();
+            process = Item.gameObject.AddComponent<ProcessDestroy>();
         }
 
         public void GetMatchNeigbor(Direction direction, Type type, List<Cell> tmpCells)
@@ -190,6 +197,8 @@ namespace Match
 
         private void Selected()
         {
+            if (gameState.CurrentState() != GameState.PlayerInput ) return;
+
             Item.Selected();
             selectable.OnSelected(this, out bool isSelect);
 

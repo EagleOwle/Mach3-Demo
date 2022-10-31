@@ -7,7 +7,12 @@ namespace Match
 {
     public interface IEndProcessListener
     {
-        public void EndProcess();
+        public void EndProcess(ProcessType type);
+    }
+
+    public interface IGameState
+    {
+        public GameState CurrentState();
     }
 
     public enum GameState
@@ -19,7 +24,7 @@ namespace Match
         PlayerInput
     }
 
-    public class Board : MonoBehaviour, ISelectable, IEndProcessListener
+    public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
     {
         [SerializeField] private GamePreference gamePreference;
         [SerializeField] private BoardCreate boardCreate;
@@ -33,14 +38,21 @@ namespace Match
 
         private List<Cell> matchCells = new List<Cell>();
 
-        private GameState nextState;
+        private GameState gameState;
         private GameState NextState
         {
+
             set
             {
-                nextState = value;
+                gameState = value;
                 Invoke(nameof(ChangeState), 0.1f);
             }
+
+        }
+
+        public GameState CurrentState()
+        {
+            return gameState;
         }
 
         private bool BoardIsFull
@@ -70,7 +82,7 @@ namespace Match
 
         private void Start()
         {
-            boardCreate.Create(gamePreference, out cells, this as ISelectable, out firstRow);
+            boardCreate.Create(gamePreference, out cells, this as ISelectable, this as IGameState, out firstRow);
             //UpdateBoard();
             NextState = GameState.SpawnItem;
         }   
@@ -90,17 +102,6 @@ namespace Match
             }
         }
 
-        private IEnumerator UpdateBoardRoutine()
-        {
-            while (BoardIsFull == false)
-            {
-                yield return StartCoroutine(SpawnItemRoutine());
-                FallItem();
-            }
-
-            StartCoroutine(FindMatchRoutine());
-        }
-
         private void SpawnItem()
         {
             foreach (var cell in firstRow)
@@ -113,34 +114,6 @@ namespace Match
             }
         }
 
-        private IEnumerator SpawnItemRoutine()
-        {
-            List<Item> waitSpawnItems = new List<Item>();
-
-            foreach (var cell in firstRow)
-            {
-                if (cell.Type == Type.None)
-                {
-                    Item item = cell.SpawnRandomType(out ProcessSpawn process);
-                    processHandler.AddProcess(process);
-                    waitSpawnItems.Add(item);
-                }
-            }
-
-            while (waitSpawnItems.Count > 0)
-            {
-                for (int i = 0; i < waitSpawnItems.Count; i++)
-                {
-                    //if (waitSpawnItems[i].endSpawn == true)
-                    //{
-                    //    waitSpawnItems.RemoveAt(i);
-                    //}
-                }
-
-                yield return null;
-            }
-        }
-
         private void FallItem()
         {
             for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
@@ -150,11 +123,21 @@ namespace Match
                     cells[x, y].FallingDown();
                 }
             }
+
+            if (BoardIsFull == false)
+            {
+                NextState = GameState.SpawnItem;
+            }
+            else
+            {
+                NextState = GameState.FindMatchItem;
+            }
+
         }
 
-        private List<Cell> FindMatch()
+        private void FindMatch()
         {
-            List<Cell> matchCells = new List<Cell>();
+            matchCells = new List<Cell>();
 
             for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
             {
@@ -167,27 +150,14 @@ namespace Match
                 }
             }
 
-            return matchCells;
-        }
-
-        private IEnumerator FindMatchRoutine()
-        {
-            List<Cell> matchCells = new List<Cell>();
-
-            for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
+            if (matchCells.Count > 0)
             {
-                for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
-                {
-                    CheckMatchDirection(cells[x, y], Direction.Top, matchCells);
-                    CheckMatchDirection(cells[x, y], Direction.Right, matchCells);
-                    CheckMatchDirection(cells[x, y], Direction.Bottom, matchCells);
-                    CheckMatchDirection(cells[x, y], Direction.Left, matchCells);
-                }
+                NextState = GameState.DestroyMatchItem;
             }
-
-            yield return StartCoroutine(DestroyMatchCellRoutine(matchCells.ToArray()));
-
-            UpdateBoard();
+            else
+            {
+                NextState = GameState.PlayerInput;
+            }
         }
 
         private void CheckMatchDirection(Cell cell, Direction direction, List<Cell> matchCells)
@@ -208,45 +178,25 @@ namespace Match
             }
         }
 
-        private void DestroyMatchItem(List<Cell> cells)
+        private void DestroyMatchItem()
         {
-            for (int i = 0; i < cells.Count; i++)
+            if(matchCells.Count == 0)
             {
-                cells[i].DestroyItem();
-                cells.RemoveAt(i);
+                Debug.LogError("Cells count " + matchCells.Count);
             }
+
+            for (int i = 0; i < matchCells.Count; i++)
+            {
+                matchCells[i].DestroyItem(out ProcessDestroy process);
+                processHandler.AddProcess(process);
+            }
+
+            matchCells.Clear();
         }
-
-        private IEnumerator DestroyMatchCellRoutine(Cell[] cells)
-        {
-            //Debug.Log("Destroy Cells");
-            List<Cell> waitSpawnItems = new List<Cell>();
-
-            for (int i = 0; i < cells.Length; i++)
-            {
-                cells[i].DestroyItem();
-                waitSpawnItems.Add(cells[i]);
-            }
-
-            while (waitSpawnItems.Count > 0)
-            {
-                for (int i = 0; i < waitSpawnItems.Count; i++)
-                {
-                    if (waitSpawnItems[i].Item == null)
-                    {
-                        waitSpawnItems.RemoveAt(i);
-                    }
-                }
-
-                yield return null;
-            }
-        }
-
-        private IEnumerator ReplacementRoutine(Cell cellOne, Cell cellTwo)
+        
+        private void Replacement(Cell cellOne, Cell cellTwo)
         {
             replacement.Replace(cellOne, cellTwo);
-            yield return new WaitForSeconds(0.3f);
-            StartCoroutine(FindMatchRoutine());
         }
 
         public void OnSelected(Cell cell, out bool isSelect)
@@ -263,11 +213,11 @@ namespace Match
             {
                 if (currentSelected.IsNeighbor(cell))
                 {
-                    StartCoroutine(ReplacementRoutine(cell, currentSelected));
-
+                    Replacement(cell, currentSelected);
                     currentSelected.Deselected();
                     currentSelected = null;
                     isSelect = false;
+                    NextState = GameState.FindMatchItem;
                 }
                 else
                 {
@@ -305,47 +255,33 @@ namespace Match
 
         public void ChangeState()
         {
-            Debug.Log("ChangeState: " + nextState);
-            switch (nextState)
+            Debug.Log("ChangeState: " + gameState);
+            switch (gameState)
             {
                 case GameState.SpawnItem:
+
                     SpawnItem();
+
                     break;
-
                 case GameState.FalldownItem:
-                    FallItem();
-                    if(BoardIsFull == false)
-                    {
-                        NextState = GameState.SpawnItem;
-                    }
-                    else
-                    {
-                        NextState = GameState.FindMatchItem;
-                    }
 
+                    FallItem();
+                    
                     break;
                 case GameState.FindMatchItem:
 
-                    matchCells = FindMatch();
-
-                    if(matchCells.Count > 0)
-                    {
-                        NextState = GameState.DestroyMatchItem;
-                    }
-                    else
-                    {
-                        NextState = GameState.PlayerInput;
-                    }
+                    FindMatch();
 
                     break;
                 case GameState.DestroyMatchItem:
-
-                    DestroyMatchItem(matchCells);
-                    NextState = GameState.FalldownItem;
+                    
+                    DestroyMatchItem();
 
                     break;
                 case GameState.PlayerInput:
-                    Debug.Break();
+                    //Debug.Break();
+                    replacement.Revert();
+
                     break;
                 default:
                     Debug.LogError("No State in enum");
@@ -354,9 +290,119 @@ namespace Match
             
         }
 
-        public void EndProcess()
+        public void EndProcess(ProcessType type)
         {
-            NextState = GameState.FalldownItem;
+            Debug.Log("End Process: " + type);
+
+            switch (type)
+            {
+                case ProcessType.Spawn:
+                    NextState = GameState.FalldownItem;
+                    break;
+                case ProcessType.Destroy:
+                    NextState = GameState.FalldownItem;
+                    break;
+                default:
+                    Debug.LogError("No Type In ProcessType");
+                    break;
+            }
+
+            
         }
+
+        #region Routine
+        //private IEnumerator DestroyMatchCellRoutine(Cell[] cells)
+        //{
+        //    //Debug.Log("Destroy Cells");
+        //    List<Cell> waitSpawnItems = new List<Cell>();
+
+        //    for (int i = 0; i < cells.Length; i++)
+        //    {
+        //        cells[i].DestroyItem();
+        //        waitSpawnItems.Add(cells[i]);
+        //    }
+
+        //    while (waitSpawnItems.Count > 0)
+        //    {
+        //        for (int i = 0; i < waitSpawnItems.Count; i++)
+        //        {
+        //            if (waitSpawnItems[i].Item == null)
+        //            {
+        //                waitSpawnItems.RemoveAt(i);
+        //            }
+        //        }
+
+        //        yield return null;
+        //    }
+        //}
+
+        //private IEnumerator ReplacementRoutine(Cell cellOne, Cell cellTwo)
+        //{
+        //    replacement.Replace(cellOne, cellTwo);
+        //    yield return new WaitForSeconds(0.3f);
+        //    StartCoroutine(FindMatchRoutine());
+        //}
+
+        //private IEnumerator FindMatchRoutine()
+        //{
+        //    List<Cell> matchCells = new List<Cell>();
+
+        //    for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
+        //    {
+        //        for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
+        //        {
+        //            CheckMatchDirection(cells[x, y], Direction.Top, matchCells);
+        //            CheckMatchDirection(cells[x, y], Direction.Right, matchCells);
+        //            CheckMatchDirection(cells[x, y], Direction.Bottom, matchCells);
+        //            CheckMatchDirection(cells[x, y], Direction.Left, matchCells);
+        //        }
+        //    }
+
+        //    yield return StartCoroutine(DestroyMatchCellRoutine(matchCells.ToArray()));
+
+        //    UpdateBoard();
+        //}
+
+        //private IEnumerator SpawnItemRoutine()
+        //{
+        //    List<Item> waitSpawnItems = new List<Item>();
+
+        //    foreach (var cell in firstRow)
+        //    {
+        //        if (cell.Type == Type.None)
+        //        {
+        //            Item item = cell.SpawnRandomType(out ProcessSpawn process);
+        //            processHandler.AddProcess(process);
+        //            waitSpawnItems.Add(item);
+        //        }
+        //    }
+
+        //    while (waitSpawnItems.Count > 0)
+        //    {
+        //        for (int i = 0; i < waitSpawnItems.Count; i++)
+        //        {
+        //            //if (waitSpawnItems[i].endSpawn == true)
+        //            //{
+        //            //    waitSpawnItems.RemoveAt(i);
+        //            //}
+        //        }
+
+        //        yield return null;
+        //    }
+        //}
+
+        //private IEnumerator UpdateBoardRoutine()
+        //{
+        //    while (BoardIsFull == false)
+        //    {
+        //        yield return StartCoroutine(SpawnItemRoutine());
+        //        FallItem();
+        //    }
+
+        //    StartCoroutine(FindMatchRoutine());
+        //}
+
+        #endregion
+
     }
 }

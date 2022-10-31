@@ -31,7 +31,7 @@ namespace Match
 
             if(processes.Count == 0)
             {
-                this.endProcessListener.EndProcess();
+                this.endProcessListener.EndProcess(value.ProcessType);
             }
         }
 
