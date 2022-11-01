@@ -201,8 +201,6 @@ namespace Match
 
         public void OnSelected(Cell cell, out bool isSelect)
         {
-            //Debug.Log("Selelected " + cell.boardPosition.x + "/" + cell.boardPosition.y);
-
             if (currentSelected == cell)
             {
                 isSelect = false;
@@ -253,9 +251,8 @@ namespace Match
             }
         }
 
-        public void ChangeState()
+        private void ChangeState()
         {
-            Debug.Log("ChangeState: " + gameState);
             switch (gameState)
             {
                 case GameState.SpawnItem:
@@ -279,9 +276,7 @@ namespace Match
 
                     break;
                 case GameState.PlayerInput:
-                    //Debug.Break();
                     replacement.Revert();
-
                     break;
                 default:
                     Debug.LogError("No State in enum");
@@ -292,8 +287,6 @@ namespace Match
 
         public void EndProcess(ProcessType type)
         {
-            Debug.Log("End Process: " + type);
-
             switch (type)
             {
                 case ProcessType.Spawn:
@@ -302,8 +295,10 @@ namespace Match
                 case ProcessType.Destroy:
                     NextState = GameState.FalldownItem;
                     break;
+                case ProcessType.Move:
+                    break;
                 default:
-                    Debug.LogError("No Type In ProcessType");
+                    Debug.LogError("No Type In Switch ProcessType");
                     break;
             }
 

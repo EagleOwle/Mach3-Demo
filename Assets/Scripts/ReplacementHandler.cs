@@ -32,17 +32,16 @@ namespace Match
             }
             else
             {
-                Debug.Log("Revert No Consilience");
+               // Debug.Log("Revert No Consilience");
             }
         }
 
         private void Replacement()
         {
-            cellOne.SetItem = itemTwo;
-            cellTwo.SetItem = itemOne;
+            cellOne.SetItem(itemTwo);
+            cellTwo.SetItem(itemOne);
             itemOne = cellOne.Item;
             itemTwo = cellTwo.Item;
-
         }
 
         private bool Consilience(Item itemOne, Item itemTwo)
@@ -64,5 +63,6 @@ namespace Match
             this.itemOne = null;
             this.itemTwo = null;
         }
+
     }
 }

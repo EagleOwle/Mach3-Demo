@@ -54,17 +54,19 @@ namespace Match
         public Cell Bottom;
         public Cell Left;
 
-        public Item Item { get; private set; }
-        public Item SetItem
+        private Item item;
+        public Item Item => item;
+        public void SetItem(Item item)
         {
-            set
-            {
-                Item = value;
-                Item.transform.SetParent(transform);
-                Item.MovePosition();
-            }
+            this.item = item;
+            this.item.MoveDefault(transform);
         }
         
+        private void ClearItem()
+        {
+            item = null;
+        }
+
         private GamePreference preference;
         private ISelectable selectable;
         private IGameState gameState;
@@ -83,12 +85,11 @@ namespace Match
 
         public Item SpawnRandomType(out ProcessSpawn process)
         {
-            Item = Instantiate(preference.prefabStore.prefabItem, transform);
-            process = Item.gameObject.AddComponent<ProcessSpawn>();
-            Item.Initialise(preference, Size);
-            Item.SetRandomType();
-            //Item.StartScaleAndShow();
-            return Item;
+            item = Instantiate(preference.prefabStore.prefabItem, transform);
+            process = item.gameObject.AddComponent<ProcessSpawn>();
+            item.Initialise(preference, Size);
+            item.SetRandomType();
+            return item;
         }
 
         private void SetNeiborth(Cell[,] cells)
@@ -103,18 +104,19 @@ namespace Match
         {
             if (Item == null) return;
 
-           Cell lastCell = FindTheLatestBelow(Bottom);
+            Cell bottomEmptyCell = FindTheLatestBelow(Bottom);
 
-            if (lastCell != null)
+            if (bottomEmptyCell != null)
             {
-                if (lastCell.Item != null)
+                if (bottomEmptyCell.Item != null)
                 {
                     Debug.LogError("Cell.Item not empty");
                 }
 
-                lastCell.SetItem = Item;
-                Item = null;
+                bottomEmptyCell.SetItem(Item);
+                ClearItem();
             }
+
         }
 
         public Cell FindTheLatestBelow(Cell currentCell)
@@ -141,7 +143,6 @@ namespace Match
                 Debug.LogError("Item is null");
             }
 
-            //Item.StartScaleAndHide();
             process = Item.gameObject.AddComponent<ProcessDestroy>();
         }
 
@@ -199,7 +200,6 @@ namespace Match
         {
             if (gameState.CurrentState() != GameState.PlayerInput ) return;
 
-            Item.Selected();
             selectable.OnSelected(this, out bool isSelect);
 
             if(isSelect)
@@ -208,7 +208,6 @@ namespace Match
 
         public void Deselected()
         {
-            Item.Deselected();
             image.color = Color.black;
         }
 
