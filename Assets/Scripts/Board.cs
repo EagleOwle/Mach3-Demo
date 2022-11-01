@@ -28,7 +28,7 @@ namespace Match
     {
         [SerializeField] private GamePreference gamePreference;
         [SerializeField] private BoardCreate boardCreate;
-
+        [SerializeField] private SoundHandler soundHandler;
         [SerializeField] private Cell[,] cells;
         [SerializeField] private Cell[] firstRow;
 
@@ -41,13 +41,11 @@ namespace Match
         private GameState gameState;
         private GameState NextState
         {
-
             set
             {
                 gameState = value;
                 Invoke(nameof(ChangeState), 0.1f);
             }
-
         }
 
         public GameState CurrentState()
@@ -108,7 +106,7 @@ namespace Match
             {
                 if (cell.Type == Type.None)
                 {
-                    Item item = cell.SpawnRandomType(out ProcessSpawn process);
+                    Item item = cell.SpawnRandomType(soundHandler, out ProcessSpawn process);
                     processHandler.AddProcess(process);
                 }
             }
@@ -212,6 +210,7 @@ namespace Match
                 if (currentSelected.IsNeighbor(cell))
                 {
                     Replacement(cell, currentSelected);
+                    cell.Deselected();
                     currentSelected.Deselected();
                     currentSelected = null;
                     isSelect = false;
@@ -228,6 +227,7 @@ namespace Match
             {
                 currentSelected = cell;
                 isSelect = true;
+                
             }
         }
 

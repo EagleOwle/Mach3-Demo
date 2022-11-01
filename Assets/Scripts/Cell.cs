@@ -83,11 +83,11 @@ namespace Match
             button.onClick.AddListener(() => Selected());
         }
 
-        public Item SpawnRandomType(out ProcessSpawn process)
+        public Item SpawnRandomType(SoundHandler soundHandler, out ProcessSpawn process)
         {
             item = Instantiate(preference.prefabStore.prefabItem, transform);
             process = item.gameObject.AddComponent<ProcessSpawn>();
-            item.Initialise(preference, Size);
+            item.Initialise(preference, Size, soundHandler);
             item.SetRandomType();
             return item;
         }
@@ -202,13 +202,12 @@ namespace Match
 
             selectable.OnSelected(this, out bool isSelect);
 
-            if(isSelect)
-            image.color = Color.white;
+            if(isSelect) Item.Selected();
         }
 
         public void Deselected()
         {
-            image.color = Color.black;
+            Item.Deselected();
         }
 
     }
