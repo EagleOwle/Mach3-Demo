@@ -32,6 +32,7 @@ namespace Match
             int typeValue = UnityEngine.Random.Range(0, (int)Type.None);
             type = (Type)typeValue;
             image.sprite = preference.GetItemByType(type).sprite;
+            soundHandler.Spawn();
         }
 
         public void MoveDefault(Transform parent)

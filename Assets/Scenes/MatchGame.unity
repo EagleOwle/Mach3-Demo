@@ -205,7 +205,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
-  m_Pitch: 1
+  m_Pitch: 0.7
   Loop: 0
   Mute: 0
   Spatialize: 0
@@ -300,8 +300,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fe832446fd35de48886823d392ba859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectClip: {fileID: 8300000, guid: bd3ebabde8f0c3640975b1f79eeaf6eb, type: 3}
-  dropClip: {fileID: 8300000, guid: 6e92ced3e4438bb4997317367e96ecca, type: 3}
+  selectClip: {fileID: 8300000, guid: 9c41d081df54cca429349d6c9c02961a, type: 3}
+  dropClip: {fileID: 8300000, guid: ee2873ab45c3dd84f9fb892bf5f55f1d, type: 3}
+  spawnClip: {fileID: 8300000, guid: 4a37e91c9d4f41d4ebcab560f2da4924, type: 3}
   audioSource: {fileID: 172986970}
 --- !u!1 &451720422
 GameObject:
