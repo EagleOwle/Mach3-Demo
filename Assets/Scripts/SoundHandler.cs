@@ -1,32 +1,47 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace Match
+public class SoundHandler : MonoBehaviour
 {
-    public class SoundHandler : MonoBehaviour
+    [SerializeField] private Clip selectClip;
+    [SerializeField] private Clip dropClip;
+    [SerializeField] private Clip spawnClip;
+    [SerializeField] private Clip matchClip;
+    [SerializeField] private AudioSource audioSource;
+
+    public void OnSelected()
     {
-        [SerializeField] private AudioClip selectClip;
-        [SerializeField] private AudioClip dropClip;
-        [SerializeField] private AudioClip spawnClip;
-        [SerializeField] private AudioSource audioSource;
-
-        public void OnSelected()
-        {
-            audioSource.PlayOneShot(selectClip);
-        }
-
-        public void OnDrop()
-        {
-            //audioSource.clip = dropClip;
-            //audioSource.Play();
-           audioSource.PlayOneShot(dropClip);
-        }
-
-        public void Spawn()
-        {
-            //audioSource.clip = spawnClip;
-            //audioSource.Play();
-            audioSource.PlayOneShot(spawnClip);
-        }
+        PlayOneShot(selectClip);
     }
+
+    public void OnDrop()
+    {
+        PlayOneShot(dropClip);
+    }
+
+    public void Spawn()
+    {
+        PlayOneShot(spawnClip);
+    }
+
+    public void Match()
+    {
+        PlayOneShot(matchClip);
+    }
+
+    private void PlayOneShot(Clip value)
+    {
+        if (value.clip == null) return;
+
+        audioSource.PlayOneShot(value.clip, value.valume);
+    }
+
+    [System.Serializable]
+    public class Clip
+    {
+        [Range(0, 1)]
+        public float valume;
+        public AudioClip clip;
+    }
+
 }

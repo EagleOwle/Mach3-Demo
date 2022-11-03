@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: GamePreference
   m_EditorClassIdentifier: 
   boardSetting:
-    durationScale: 7
-    durationMove: 1
+    durationScale: 10
+    durationMove: 2
     minMatchCount: 3
     sizeX: 5
     sizeY: 8

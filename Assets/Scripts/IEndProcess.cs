@@ -1,7 +1,5 @@
-﻿namespace Match
+﻿
+public interface IEndProcess
 {
-    public interface IEndProcess
-    {
-        public void EndProcess(Process value);
-    }
+    public void EndProcess(Process value);
 }

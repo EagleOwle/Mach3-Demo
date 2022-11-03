@@ -1,11 +1,9 @@
 ﻿using UnityEngine;
 
-namespace Match
+[System.Serializable]
+public class PrefabItem
 {
-    [System.Serializable]
-    public class PrefabItem
-    {
-        public Type type;
-        public Sprite sprite; 
-    }
+    public Type type;
+    public Sprite sprite;
 }
+

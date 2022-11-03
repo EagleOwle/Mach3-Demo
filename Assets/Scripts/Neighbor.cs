@@ -1,9 +1,7 @@
 ﻿
-namespace Match
+
+[System.Serializable]
+public class Neighbor
 {
-    [System.Serializable]
-    public class Neighbor
-    {
-        public Cell cell;
-    }
+    public Cell cell;
 }

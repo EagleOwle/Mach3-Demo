@@ -1,7 +1,5 @@
-﻿namespace Match
+﻿
+public interface ISelectable
 {
-    public interface ISelectable
-    {
-        void OnSelected(Cell cell, out bool isSelect);
-    }
+    void OnSelected(Cell cell, out bool isSelect);
 }

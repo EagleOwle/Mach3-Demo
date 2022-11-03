@@ -1,11 +1,8 @@
-﻿namespace Match
+﻿public enum Type
 {
-    public enum Type
-    {
-        Box,
-        Trianle,
-        Romb,
-        Hex,
-        None
-    }
+    Box,
+    Trianle,
+    Romb,
+    Hex,
+    None
 }

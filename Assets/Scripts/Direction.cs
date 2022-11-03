@@ -1,10 +1,9 @@
-﻿namespace Match
+﻿
+public enum Direction
 {
-    public enum Direction
-    {
-        Top,
-        Right,
-        Bottom,
-        Left
-    }
+    Top,
+    Right,
+    Bottom,
+    Left
 }
+

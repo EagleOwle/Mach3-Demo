@@ -1,10 +1,7 @@
-﻿namespace Match
+﻿public enum ProcessType
 {
-    public enum ProcessType
-    {
-        Spawn,
-        Destroy,
-        Move
-    }
-
+    Spawn,
+    Destroy,
+    Move
 }
+
