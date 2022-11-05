@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class UIController : MonoBehaviour
+public class UIMenuController : MonoBehaviour
 {
-
     [SerializeField] private UIMainMenu uiMainMenu;
     [SerializeField] private Menu background;
 

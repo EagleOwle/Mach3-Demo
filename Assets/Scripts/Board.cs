@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using System;
 
 public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 {
+    public event Action<int> eventOnMatchCells;
+
     [SerializeField] private GamePreference gamePreference;
     [SerializeField] private BoardCreate boardCreate;
     [SerializeField] private SoundHandler soundHandler;
@@ -58,21 +61,6 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
         NextState = GameState.SpawnItem;
     }
 
-    private void UpdateBoard()
-    {
-        if (BoardIsFull == false)
-        {
-            //StartCoroutine(UpdateBoardRoutine());
-            SpawnItem();
-        }
-        else
-        {
-            //replacement.Revert();
-            //Debug.Log("Board is Full");
-
-        }
-    }
-
     private void SpawnItem()
     {
         foreach (var cell in firstRow)
@@ -123,6 +111,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
         if (matchCells.Count > 0)
         {
+            eventOnMatchCells.Invoke(matchCells.Count);
             NextState = GameState.DestroyMatchItem;
         }
         else
@@ -205,26 +194,6 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
         }
     }
 
-    //private void Update()
-    //{
-
-    //    #region Debug
-    //    for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
-    //    {
-    //        for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
-    //        {
-    //            Type type = cells[x, y].Type;
-    //        }
-    //    }
-    //    #endregion
-
-
-    //    if (Input.GetKeyDown(KeyCode.Backspace))
-    //    {
-    //        SceneManager.LoadScene(SceneManager.GetSceneByBuildIndex(0).name);
-    //    }
-    //}
-
     private void ChangeState()
     {
         switch (gameState)
@@ -279,99 +248,6 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
     }
 
-    #region Routine
-    //private IEnumerator DestroyMatchCellRoutine(Cell[] cells)
-    //{
-    //    //Debug.Log("Destroy Cells");
-    //    List<Cell> waitSpawnItems = new List<Cell>();
-
-    //    for (int i = 0; i < cells.Length; i++)
-    //    {
-    //        cells[i].DestroyItem();
-    //        waitSpawnItems.Add(cells[i]);
-    //    }
-
-    //    while (waitSpawnItems.Count > 0)
-    //    {
-    //        for (int i = 0; i < waitSpawnItems.Count; i++)
-    //        {
-    //            if (waitSpawnItems[i].Item == null)
-    //            {
-    //                waitSpawnItems.RemoveAt(i);
-    //            }
-    //        }
-
-    //        yield return null;
-    //    }
-    //}
-
-    //private IEnumerator ReplacementRoutine(Cell cellOne, Cell cellTwo)
-    //{
-    //    replacement.Replace(cellOne, cellTwo);
-    //    yield return new WaitForSeconds(0.3f);
-    //    StartCoroutine(FindMatchRoutine());
-    //}
-
-    //private IEnumerator FindMatchRoutine()
-    //{
-    //    List<Cell> matchCells = new List<Cell>();
-
-    //    for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
-    //    {
-    //        for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
-    //        {
-    //            CheckMatchDirection(cells[x, y], Direction.Top, matchCells);
-    //            CheckMatchDirection(cells[x, y], Direction.Right, matchCells);
-    //            CheckMatchDirection(cells[x, y], Direction.Bottom, matchCells);
-    //            CheckMatchDirection(cells[x, y], Direction.Left, matchCells);
-    //        }
-    //    }
-
-    //    yield return StartCoroutine(DestroyMatchCellRoutine(matchCells.ToArray()));
-
-    //    UpdateBoard();
-    //}
-
-    //private IEnumerator SpawnItemRoutine()
-    //{
-    //    List<Item> waitSpawnItems = new List<Item>();
-
-    //    foreach (var cell in firstRow)
-    //    {
-    //        if (cell.Type == Type.None)
-    //        {
-    //            Item item = cell.SpawnRandomType(out ProcessSpawn process);
-    //            processHandler.AddProcess(process);
-    //            waitSpawnItems.Add(item);
-    //        }
-    //    }
-
-    //    while (waitSpawnItems.Count > 0)
-    //    {
-    //        for (int i = 0; i < waitSpawnItems.Count; i++)
-    //        {
-    //            //if (waitSpawnItems[i].endSpawn == true)
-    //            //{
-    //            //    waitSpawnItems.RemoveAt(i);
-    //            //}
-    //        }
-
-    //        yield return null;
-    //    }
-    //}
-
-    //private IEnumerator UpdateBoardRoutine()
-    //{
-    //    while (BoardIsFull == false)
-    //    {
-    //        yield return StartCoroutine(SpawnItemRoutine());
-    //        FallItem();
-    //    }
-
-    //    StartCoroutine(FindMatchRoutine());
-    //}
-
-    #endregion
-
+   
 }
 
