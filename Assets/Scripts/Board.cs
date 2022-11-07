@@ -18,7 +18,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
     private ReplacementHandler replacement;
     private ProcessHandler processHandler;
 
-    private List<Cell> matchCells = new List<Cell>();
+    //private List<Cell> matchCells = new List<Cell>();
 
     private List<List<Cell>> cellArrays = new List<List<Cell>>();
 
@@ -99,23 +99,28 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
     private void FindMatch()
     {
-        matchCells.Clear();
+        //matchCells.Clear();
         cellArrays.Clear();
 
         for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
         {
             for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
             {
-                CheckMatchDirection(cells[x, y], Direction.Top, matchCells);
-                CheckMatchDirection(cells[x, y], Direction.Right, matchCells);
+                if (Contains(cellArrays, cells[x, y])) continue;
+
+                CheckMatchDirection(cells[x, y], Direction.Top, cellArrays);
+                CheckMatchDirection(cells[x, y], Direction.Right, cellArrays);
                // CheckMatchDirection(cells[x, y], Direction.Bottom, matchCells);
                // CheckMatchDirection(cells[x, y], Direction.Left, matchCells);
             }
         }
 
-        if (matchCells.Count > 0)
+        FindIntersectCells(cellArrays);
+        SetRandomColor(cellArrays);
+
+        if (cellArrays.Count > 0)
         {
-            eventOnMatchCells.Invoke(matchCells.Count);
+            eventOnMatchCells.Invoke(cellArrays.Count);
             NextState = GameState.DestroyMatchItem;
         }
         else
@@ -124,7 +129,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
         }
     }
 
-    private void CheckMatchDirection(Cell cell, Direction direction, List<Cell> matchCells)
+    private void CheckMatchDirection(Cell cell, Direction direction, List<List<Cell>> cellArrays)
     {
         List<Cell> tmpCells = new List<Cell>();
 
@@ -133,35 +138,26 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
         if (tmpCells.Count >= gamePreference.boardSetting.minMatchCount)
         {
             cellArrays.Add(tmpCells);
-
-            Color color = UnityEngine.Random.ColorHSV();
-
-            foreach (var item in tmpCells)
-            {
-                item.Item.SetColor(color);
-                // if (matchCells.Contains(item) == false)
-                {
-                    matchCells.Add(item);
-                }
-            }
         }
     }
 
     private void DestroyMatchItem()
     {
-        if (matchCells.Count == 0)
+        if (cellArrays.Count == 0)
         {
-            Debug.LogError("Cells count " + matchCells.Count);
+            Debug.LogError("Cells count " + cellArrays.Count);
         }
 
-        for (int i = 0; i < matchCells.Count; i++)
+        for (int i = 0; i < cellArrays.Count; i++)
         {
-            matchCells[i].DestroyItem(out ProcessDestroy process);
-            processHandler.AddProcess(process);
+            foreach (var item in cellArrays[i])
+            {
+                item.DestroyItem(out ProcessDestroy process);
+                processHandler.AddProcess(process);
+            }
         }
 
         soundHandler.Match();
-        matchCells.Clear();
     }
 
     private void Replacement(Cell cellOne, Cell cellTwo)
@@ -224,7 +220,6 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
                 break;
             case GameState.DestroyMatchItem:
 
-                SetColorArraysCell(cellArrays);
                 Invoke(nameof(DestroyMatchItem), 3);
                 //DestroyMatchItem();
 
@@ -259,9 +254,9 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
     }
 
-    private void SetColorArraysCell(List<List<Cell>> cellArrays)
+    private void FindIntersectCells(List<List<Cell>> cellArrays)
     {
-        Debug.Log(cellArrays.Count);
+        //Debug.Log(cellArrays.Count);
         for (int i = 0; i < cellArrays.Count; i++)
         {
             for (int ii = 0; ii < cellArrays.Count; ii++)
@@ -270,13 +265,52 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
                 IEnumerable<Cell> inBoth = cellArrays[i].Intersect(cellArrays[ii]);
 
-                foreach (var item in inBoth)
+                if(inBoth.)
+                inBoth = cellArrays[i].Union(cellArrays[ii]);
+
+                List<Cell> tmp = inBoth.ToList();
+                
+                if (tmp.Count > 0)
                 {
-                    item.Item.SetColor(Color.black);
+                    tmp.AddRange(cellArrays[ii]);
+                    tmp.AddRange(cellArrays[i]);
+
+                    cellArrays.RemoveAt(ii);
+                    cellArrays.RemoveAt(i);
+
+                    cellArrays.Add(tmp);
                 }
+
+                //foreach (var item in inBoth)
+                //{
+                //    item.Item.SetColor(Color.black);
+                //}
 
             }
         }
+    }
+
+    private void SetRandomColor(List<List<Cell>> cellArrays)
+    {
+        for (int i = 0; i < cellArrays.Count; i++)
+        {
+            Color color = UnityEngine.Random.ColorHSV();
+
+            foreach (var item in cellArrays[i])
+            {
+                item.Item.SetColor(color);
+            }
+        }
+    }
+
+    private bool Contains(List<List<Cell>> cellArrays, Cell cell)
+    {
+        for (int i = 0; i < cellArrays.Count; i++)
+        {
+            if (cellArrays[i].Contains(cell)) return true;
+        }
+
+        return false;
     }
 
 }
