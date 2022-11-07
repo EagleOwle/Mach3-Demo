@@ -2,6 +2,7 @@
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 {
@@ -18,6 +19,8 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
     private ProcessHandler processHandler;
 
     private List<Cell> matchCells = new List<Cell>();
+
+    private List<List<Cell>> cellArrays = new List<List<Cell>>();
 
     private GameState gameState;
     private GameState NextState
@@ -96,7 +99,8 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
     private void FindMatch()
     {
-        matchCells = new List<Cell>();
+        matchCells.Clear();
+        cellArrays.Clear();
 
         for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
         {
@@ -104,8 +108,8 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
             {
                 CheckMatchDirection(cells[x, y], Direction.Top, matchCells);
                 CheckMatchDirection(cells[x, y], Direction.Right, matchCells);
-                CheckMatchDirection(cells[x, y], Direction.Bottom, matchCells);
-                CheckMatchDirection(cells[x, y], Direction.Left, matchCells);
+               // CheckMatchDirection(cells[x, y], Direction.Bottom, matchCells);
+               // CheckMatchDirection(cells[x, y], Direction.Left, matchCells);
             }
         }
 
@@ -128,10 +132,14 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
         if (tmpCells.Count >= gamePreference.boardSetting.minMatchCount)
         {
-            
+            cellArrays.Add(tmpCells);
+
+            Color color = UnityEngine.Random.ColorHSV();
+
             foreach (var item in tmpCells)
             {
-                if (matchCells.Contains(item) == false)
+                item.Item.SetColor(color);
+                // if (matchCells.Contains(item) == false)
                 {
                     matchCells.Add(item);
                 }
@@ -141,25 +149,10 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
     private void DestroyMatchItem()
     {
-       if (matchCells.Count == 0)
+        if (matchCells.Count == 0)
         {
             Debug.LogError("Cells count " + matchCells.Count);
         }
-
-        //Type type = matchCells[0].Type;
-        //Color color = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0, 5f, 1f, 1f);
-
-        //for (int i = 0; i < matchCells.Count; i++)
-        //{
-        //    if (matchCells[i].Type != type)
-        //    {
-        //        type = matchCells[i].Type;
-        //        color = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0, 5f, 1f, 1f);
-        //    }
-
-        //    matchCells[i].Item.SetColor(color);
-        //}
-
 
         for (int i = 0; i < matchCells.Count; i++)
         {
@@ -231,8 +224,9 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
                 break;
             case GameState.DestroyMatchItem:
 
-                //Invoke(nameof(DestroyMatchItem), 3);
-                DestroyMatchItem();
+                SetColorArraysCell(cellArrays);
+                Invoke(nameof(DestroyMatchItem), 3);
+                //DestroyMatchItem();
 
                 break;
             case GameState.PlayerInput:
@@ -265,6 +259,25 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
     }
 
-   
+    private void SetColorArraysCell(List<List<Cell>> cellArrays)
+    {
+        Debug.Log(cellArrays.Count);
+        for (int i = 0; i < cellArrays.Count; i++)
+        {
+            for (int ii = 0; ii < cellArrays.Count; ii++)
+            {
+                if (i == ii) continue;
+
+                IEnumerable<Cell> inBoth = cellArrays[i].Intersect(cellArrays[ii]);
+
+                foreach (var item in inBoth)
+                {
+                    item.Item.SetColor(Color.black);
+                }
+
+            }
+        }
+    }
+
 }
 
