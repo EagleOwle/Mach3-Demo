@@ -54,9 +54,15 @@ public class Cell : MonoBehaviour
 
     private Item item;
     public Item Item => item;
-    public void SetItem(Item item)
+    public void SetAndMoveItem(Item item)
     {
+        if(this.item != null && this.item != item)
+        {
+            this.item.eventOnPosition -= ItemOnPosition;
+        }
+
         this.item = item;
+        this.item.eventOnPosition += ItemOnPosition;
         this.item.MoveDefault(transform);
     }
 
@@ -111,7 +117,7 @@ public class Cell : MonoBehaviour
                 Debug.LogError("Cell.Item not empty");
             }
 
-            bottomEmptyCell.SetItem(Item);
+            bottomEmptyCell.SetAndMoveItem(Item);
             ClearItem();
         }
 
@@ -207,6 +213,28 @@ public class Cell : MonoBehaviour
     {
         Item.Deselected();
     }
+
+    public void Push(float power, bool origin = false)
+    {
+        if (origin == false)
+        {
+            if (item != null)
+            {
+                item.Push(power);
+            }
+        }
+
+        if (Bottom != null)
+        {
+            Bottom.Push(power /= 2);
+        }
+    }
+
+    private void ItemOnPosition()
+    {
+        Push(10, true);
+    }
+
 
 }
 

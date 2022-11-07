@@ -36,8 +36,8 @@ public class ReplacementHandler
 
     private void Replacement()
     {
-        cellOne.SetItem(itemTwo);
-        cellTwo.SetItem(itemOne);
+        cellOne.SetAndMoveItem(itemTwo);
+        cellTwo.SetAndMoveItem(itemOne);
         itemOne = cellOne.Item;
         itemTwo = cellTwo.Item;
     }

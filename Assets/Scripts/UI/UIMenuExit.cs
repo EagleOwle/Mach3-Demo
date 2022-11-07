@@ -12,7 +12,6 @@ public class UIMenuExit : Menu
     {
         yesButton.onClick.AddListener(OnButtonYes);
         noButton.onClick.AddListener(OnButtonNo);
-        OnButtonNo();
     }
 
     private void OnButtonYes()

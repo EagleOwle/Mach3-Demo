@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 841665503565645250}
   - component: {fileID: 9215779470539764748}
   - component: {fileID: 5793073931945732121}
+  - component: {fileID: 7264460955855511865}
   - component: {fileID: 4910185786309112065}
   m_Layer: 5
   m_Name: Item
@@ -90,9 +91,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de108bad207680546a7ee65696431304, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  motion: {fileID: 7264460955855511865}
   image: {fileID: 9215779470539764748}
   outline: {fileID: 4910185786309112065}
   speedSelect: 5
+--- !u!114 &7264460955855511865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 189520983572671913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f87fabdaa3b80848bec62eeea9e5685, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &4910185786309112065
 MonoBehaviour:
   m_ObjectHideFlags: 0

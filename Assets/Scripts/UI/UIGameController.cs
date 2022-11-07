@@ -15,7 +15,6 @@ public class UIGameController : MonoBehaviour
         topPanel.Initialise(playerData);
         pauseButton.onClick.AddListener(OnButtonPause);
         pausePanel.Initialise();
-        pausePanel.Hide();
     }
 
     private void OnButtonPause()

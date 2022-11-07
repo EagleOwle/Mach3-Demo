@@ -3,12 +3,15 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(MotionItem))]
 public class Item : MonoBehaviour
 {
+    public Action eventOnPosition;
+
+    [SerializeField] private MotionItem motion;
     [SerializeField] private Image image;
     [SerializeField] private Outline outline;
     [SerializeField] private float speedSelect = 1;
-
 
     private Type type;
     public Type Type => type;
@@ -20,6 +23,8 @@ public class Item : MonoBehaviour
     {
         this.preference = preference;
         this.soundHandler = soundHandler;
+        motion.eventEndMove += EndMove;
+        motion.Initialise(preference.boardSetting);
         type = Type.None;
         outline.enabled = false;
     }
@@ -32,26 +37,20 @@ public class Item : MonoBehaviour
         soundHandler.Spawn();
     }
 
+    public void Push(float power)
+    {
+        motion.Push(power);
+    }
+
     public void MoveDefault(Transform parent)
     {
-        transform.SetParent(parent);
-        StartCoroutine(MovePosition(EndMove));
+        motion.MoveDefault(parent);
     }
 
     private void EndMove()
     {
+        eventOnPosition.Invoke();
         soundHandler.OnDrop();
-    }
-
-    private IEnumerator MovePosition(Action endMove)
-    {
-        while (transform.localPosition != Vector3.zero)
-        {
-            transform.localPosition = Vector3.MoveTowards(transform.localPosition, Vector3.zero, Time.deltaTime * (preference.boardSetting.durationMove * 1000));
-            yield return null;
-        }
-
-        endMove();
     }
 
     public void Selected()
@@ -77,6 +76,11 @@ public class Item : MonoBehaviour
     public void Deselected()
     {
         outline.enabled = false;
+    }
+
+    public void SetColor(Color color)
+    {
+        image.color = color;
     }
 
 }
