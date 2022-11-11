@@ -16,6 +16,8 @@ public class Item : MonoBehaviour
     private Type type;
     public Type Type => type;
 
+    public bool isVerified = false;
+
     private GamePreference preference;
     private SoundHandler soundHandler;
 
@@ -81,6 +83,11 @@ public class Item : MonoBehaviour
     public void SetColor(Color color)
     {
         image.color = color;
+    }
+
+    public void EnableOutline()
+    {
+        outline.enabled = true;
     }
 
 }

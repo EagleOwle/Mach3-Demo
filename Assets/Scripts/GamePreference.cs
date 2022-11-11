@@ -3,6 +3,7 @@
 public class GamePreference : ScriptableObject
 {
     public BoardSetting boardSetting;
+    public ApplicationSetting applicationSetting;
     public PrefabStore prefabStore;
     public PrefabItem[] items;
 

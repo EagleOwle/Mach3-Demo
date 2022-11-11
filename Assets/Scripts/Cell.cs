@@ -15,16 +15,12 @@ public class Cell : MonoBehaviour
     {
         get
         {
-            text.transform.SetAsLastSibling();
-
             if (Item == null)
             {
-                text.text = "None \n" + boardX + " / " + boardY;
                 return Type.None;
             }
             else
             {
-                text.text = Item.Type + "\n" + boardX + " / " + boardY;
                 return Item.Type;
             }
         }
@@ -46,6 +42,44 @@ public class Cell : MonoBehaviour
     private int boardX, boardY;
     public Vector2 boardPosition => (new Vector2(boardX, boardY));
 
+    public bool GetNeiborth(Direction direction, out Cell neiborth)
+    {
+        neiborth = null;
+        switch (direction)
+        {
+            case Direction.Top:
+                if (Top)
+                {
+                    neiborth = Top;
+                    return true;
+                }
+                break;
+            case Direction.Right:
+                if (Right)
+                {
+                    neiborth = Right;
+                    return true;
+                }
+                break;
+            case Direction.Bottom:
+                if (Bottom)
+                {
+                    neiborth = Bottom;
+                    return true;
+                }
+                break;
+            case Direction.Left:
+                if(Left)
+                {
+                    neiborth = Left;
+                    return true;
+                }
+                break;
+        }
+
+        return false;
+    }
+
     [Header("Neiborth")]
     public Cell Top;
     public Cell Right;
@@ -66,6 +100,8 @@ public class Cell : MonoBehaviour
         this.item.MoveDefault(transform);
     }
 
+    public bool dontDestroy = false;
+
     private void ClearItem()
     {
         item = null;
@@ -85,6 +121,8 @@ public class Cell : MonoBehaviour
         SetNeiborth(cells);
 
         button.onClick.AddListener(() => Selected());
+
+        Message(boardX + " " + boardY);
     }
 
     public Item SpawnRandomType(SoundHandler soundHandler, out ProcessSpawn process)
@@ -150,44 +188,16 @@ public class Cell : MonoBehaviour
         process = Item.gameObject.AddComponent<ProcessDestroy>();
     }
 
-    public void GetMatchNeigbor(Direction direction, Type type, List<Cell> tmpCells)
+    public void GetMatchNeigbor(Direction direction, List<Cell> cells)
     {
-        if (this.Type == Type.None) return;
-
-        if (tmpCells.Contains(this) == false)
+        cells.Add(this);
+ 
+        if (GetNeiborth(direction, out Cell neiborth))
         {
-            tmpCells.Add(this);
-        }
-
-        switch (direction)
-        {
-            case Direction.Top:
-                if (Top != null && Top.Type == type)
-                {
-                    Top.GetMatchNeigbor(direction, type, tmpCells);
-                }
-                break;
-            case Direction.Right:
-                if (Right != null && Right.Type == type)
-                {
-                    Right.GetMatchNeigbor(direction, type, tmpCells);
-                }
-                break;
-            case Direction.Bottom:
-                if (Bottom != null && Bottom.Type == type)
-                {
-                    Bottom.GetMatchNeigbor(direction, type, tmpCells);
-                }
-                break;
-            case Direction.Left:
-                if (Left != null && Left.Type == type)
-                {
-                    Left.GetMatchNeigbor(direction, type, tmpCells);
-                }
-                break;
-            default:
-                Debug.LogError("No direction value: " + direction);
-                break;
+            if (Type == neiborth.Type)
+            {
+                neiborth.GetMatchNeigbor(direction, cells);
+            }
         }
     }
 
@@ -235,6 +245,11 @@ public class Cell : MonoBehaviour
         Push(10, true);
     }
 
+    public void Message(string value)
+    {
+        text.text = value;
+        text.transform.SetAsLastSibling();
+    }
 
 }
 

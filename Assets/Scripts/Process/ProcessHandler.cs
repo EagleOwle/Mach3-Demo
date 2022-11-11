@@ -20,6 +20,16 @@ public class ProcessHandler : IEndProcess
 
     }
 
+    public void AddProcessRange(List<Process> value)
+    {
+        processes.AddRange(value);
+
+        foreach (var item in value)
+        {
+            item.StartProcess(this as IEndProcess, setting);
+        } 
+    }
+
     public void EndProcess(Process value)
     {
         processes.Remove(value);
