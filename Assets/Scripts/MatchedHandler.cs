@@ -15,33 +15,46 @@ public class MatchedHandler
     private BonusCalculate bonusCalculate;
     public List<MatchedСells> matchedСells;
 
+    List<Cell> contain = new List<Cell>();
+    List<Cell> tmpArray = new List<Cell>();
+
     public void FindMatch(Cell[,] cells)
     {
         matchedСells.Clear();
+
+        tmpArray.Clear();
+        contain.Clear();
 
         for (int y = 0; y < cells.GetLength(1); y++)
         {
             for (int x = 0; x < cells.GetLength(0); x++)
             {
-                if (ContainsCell(cells[x, y])) continue;
+                if (ContainsCell(cells[x, y], ref matchedСells)) continue;
 
-                List<Cell> vertical = new List<Cell>();
-                cells[x, y].GetMatchNeigbor(Direction.Top, vertical);
-                if (vertical.Count >= gamePreference.boardSetting.minMatchCount)
+                if (FindMatchCellInDirection(Direction.Top, cells[x, y], out tmpArray))
                 {
-                    matchedСells.Add(new MatchedСells(vertical, FigureType.Line, Direction.Top));
+                    matchedСells.Add(new MatchedСells(tmpArray, FigureType.Line, Direction.Top));
                 }
 
-
-                List<Cell> horizontal = new List<Cell>();
-                cells[x, y].GetMatchNeigbor(Direction.Right, horizontal);
-                if (horizontal.Count >= gamePreference.boardSetting.minMatchCount)
+                if (FindMatchCellInDirection(Direction.Right, cells[x, y], out tmpArray))
                 {
-                    matchedСells.Add(new MatchedСells(horizontal, FigureType.Line, Direction.Right));
+                    matchedСells.Add(new MatchedСells(tmpArray, FigureType.Line, Direction.Right));
                 }
 
             }
         }
+    }
+
+    private bool FindMatchCellInDirection(Direction direction, Cell cell, out List<Cell> cells)
+    {
+        cells = new List<Cell>();
+        cell.GetMatchNeigbor(direction, cells);
+        if (cells.Count >= gamePreference.boardSetting.minMatchCount)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public void FindIntersectCells()
@@ -62,7 +75,7 @@ public class MatchedHandler
         }
     }
 
-    private bool ContainsCell(Cell cell)
+    private bool ContainsCell(Cell cell, ref List<MatchedСells> matchedСells)
     {
         for (int i = 0; i < matchedСells.Count; i++)
         {
@@ -98,6 +111,7 @@ public class MatchedHandler
             foreach (var item in matchedСells[i].cells)
             {
                 item.Item.SetColor(color);
+                item.Item.EnableOutline();
             }
         }
 

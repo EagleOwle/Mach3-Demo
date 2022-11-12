@@ -177,21 +177,20 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
             case GameState.FindMatchItem:
 
                 matchedHandler.FindMatch(cells);
-                matchedHandler.FindIntersectCells();
+                //matchedHandler.FindIntersectCells();
                 EndFind();
+                matchedHandler.SetRandomColor();
 
                 break;
             case GameState.DestroyMatchItem:
-
-                matchedHandler.SetRandomColor();
-
-                //eventMessage.Invoke("Cells count " + cellArrayArrays.Count);
+                
+                eventMessage.Invoke("Cells count " + matchedHandler.matchedСells.Count);
 
                 for (int i = 0; i < matchedHandler.matchedСells.Count; i++)
                 {
                    // if (matchedHandler.matchedСells[i].figureType != FigureType.Line)
                     {
-                        eventMessage.Invoke("IntersectCells: " + matchedHandler.matchedСells[i].figureType);
+                       // eventMessage.Invoke("IntersectCells: " + matchedHandler.matchedСells[i].figureType);
                     }
                 }
 
