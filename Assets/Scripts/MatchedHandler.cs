@@ -15,7 +15,8 @@ public class MatchedHandler
     private BonusCalculate bonusCalculate;
     public List<MatchedСells> matchedСells;
 
-    List<Cell> contain = new List<Cell>();
+    List<Cell> containH = new List<Cell>();
+    List<Cell> containV = new List<Cell>();
     List<Cell> tmpArray = new List<Cell>();
 
     public void FindMatch(Cell[,] cells)
@@ -23,24 +24,30 @@ public class MatchedHandler
         matchedСells.Clear();
 
         tmpArray.Clear();
-        contain.Clear();
+        containH.Clear();
+        containV.Clear();
 
         for (int y = 0; y < cells.GetLength(1); y++)
         {
             for (int x = 0; x < cells.GetLength(0); x++)
             {
-                if (ContainsCell(cells[x, y], ref matchedСells)) continue;
-
-                if (FindMatchCellInDirection(Direction.Top, cells[x, y], out tmpArray))
+                if (containV.Contains(cells[x, y]) == false)
                 {
-                    matchedСells.Add(new MatchedСells(tmpArray, FigureType.Line, Direction.Top));
+                    if (FindMatchCellInDirection(Direction.Top, cells[x, y], out tmpArray))
+                    {
+                        matchedСells.Add(new MatchedСells(tmpArray, FigureType.Line, Direction.Top));
+                        containV.AddRange(tmpArray);
+                    }
                 }
 
-                if (FindMatchCellInDirection(Direction.Right, cells[x, y], out tmpArray))
+                if (containH.Contains(cells[x, y]) == false)
                 {
-                    matchedСells.Add(new MatchedСells(tmpArray, FigureType.Line, Direction.Right));
+                    if (FindMatchCellInDirection(Direction.Right, cells[x, y], out tmpArray))
+                    {
+                        matchedСells.Add(new MatchedСells(tmpArray, FigureType.Line, Direction.Right));
+                        containH.AddRange(tmpArray);
+                    }
                 }
-
             }
         }
     }
@@ -81,6 +88,13 @@ public class MatchedHandler
         {
             if (matchedСells[i].ContainsCell(cell)) return true;
         }
+
+        return false;
+    }
+
+    private bool ContainsCell(Cell cell, ref List<Cell> array)
+    {
+        if (array.Contains(cell)) return true;
 
         return false;
     }

@@ -10,6 +10,7 @@ public class Item : MonoBehaviour
 
     [SerializeField] private MotionItem motion;
     [SerializeField] private Image image;
+    [SerializeField] private Image imageBackground;
     [SerializeField] private Outline outline;
     [SerializeField] private float speedSelect = 1;
 
@@ -35,9 +36,11 @@ public class Item : MonoBehaviour
     {
         int typeValue = UnityEngine.Random.Range(0, (int)Type.None);
         type = (Type)typeValue;
-        image.sprite = preference.GetItemByType(type).sprite;
+        PrefabItem prefab = preference.GetItemByType(type);
+        image.sprite = prefab.sprite;
+        imageBackground.sprite = prefab.backgroundSprite;
         soundHandler.Spawn();
-    }
+    } 
 
     public void Push(float power)
     {
@@ -77,17 +80,18 @@ public class Item : MonoBehaviour
 
     public void Deselected()
     {
-        outline.enabled = false;
+        //outline.enabled = false;
     }
 
     public void SetColor(Color color)
     {
+        imageBackground.color = color;
         image.color = color;
     }
 
     public void EnableOutline()
     {
-        outline.enabled = true;
+        //outline.enabled = true;
     }
 
 }

@@ -177,7 +177,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
             case GameState.FindMatchItem:
 
                 matchedHandler.FindMatch(cells);
-                //matchedHandler.FindIntersectCells();
+                matchedHandler.FindIntersectCells();
                 EndFind();
                 matchedHandler.SetRandomColor();
 
