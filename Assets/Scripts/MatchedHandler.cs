@@ -72,13 +72,37 @@ public class MatchedHandler
             {
                 if (i == ii) continue;
 
-                if (matchedСells[i].Intersect(matchedСells[ii].cells, out List<Cell> resultIntersect))
+                if (matchedСells[i].Intersect(matchedСells[ii].cells, out Cell resultIntersect))
                 {
-                    FigureType figure = bonusCalculate.Figure(matchedСells[i], matchedСells[ii], resultIntersect[0]);
+                    matchedСells[i].RemoveCell(resultIntersect);
+                    matchedСells[ii].RemoveCell(resultIntersect);
 
-                    //var result = matchedСells[i].cells.Union(matchedСells[ii].cells).ToList();
+                    FigureType figure =  bonusCalculate.CalculateFigure(matchedСells[i], matchedСells[ii], resultIntersect);
+                    SetBonus(figure, resultIntersect);
                 }
             }
+        }
+    }
+
+    private void SetBonus(FigureType figure, Cell targetCell)
+    {
+        switch (figure)
+        {
+            case FigureType.Line:
+                break;
+            case FigureType.Angle:
+                targetCell.SpawnBonusItem();
+                break;
+            case FigureType.T:
+                targetCell.SpawnBonusItem();
+                break;
+            case FigureType.Cross:
+                targetCell.SpawnBonusItem();
+                break;
+
+            default:
+                Debug.LogError("No Figure in Switch");
+                break;
         }
     }
 
@@ -104,7 +128,6 @@ public class MatchedHandler
         List<Process> processes = new List<Process>();
         for (int i = 0; i < matchedСells.Count; i++)
         {
-            //List<ProcessDestroy> processes = matchedСellsArray[i].DestroyItem();
             processes.AddRange(matchedСells[i].DestroyItem());
         }
 

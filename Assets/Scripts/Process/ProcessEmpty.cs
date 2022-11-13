@@ -13,6 +13,11 @@ public class ProcessEmpty : Process
         EndProcess();
     }
 
+    public override void StartProcess(BoardSetting boardSetting)
+    {
+        EndProcess();
+    }
+
     protected override void EndProcess()
     {
         this.handler.EndProcess(this);

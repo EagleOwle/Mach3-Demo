@@ -12,9 +12,19 @@ public class ProcessMove : Process
         StartCoroutine(MovePosition(EndProcess));
     }
 
+    public override void StartProcess(BoardSetting boardSetting)
+    {
+        setting = boardSetting;
+        type = ProcessType.Move;
+        StartCoroutine(MovePosition(EndProcess));
+    }
+
     protected override void EndProcess()
     {
-        this.handler.EndProcess(this);
+        if (this.handler != null)
+        {
+            this.handler.EndProcess(this);
+        }
         Destroy(this);
     }
 

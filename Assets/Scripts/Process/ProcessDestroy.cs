@@ -12,6 +12,13 @@ public class ProcessDestroy : Process
         StartCoroutine(ScaleDown(EndProcess));
     }
 
+    public override void StartProcess(BoardSetting boardSetting)
+    {
+        setting = boardSetting;
+        type = ProcessType.Destroy;
+        StartCoroutine(ScaleDown(EndProcess));
+    }
+
     private IEnumerator ScaleDown(Action endScale)
     {
         float current = 1;
@@ -32,7 +39,11 @@ public class ProcessDestroy : Process
 
     protected override void EndProcess()
     {
-        this.handler.EndProcess(this);
+        if (this.handler != null)
+        {
+            this.handler.EndProcess(this);
+        }
+
         Destroy(gameObject);
     }
 }

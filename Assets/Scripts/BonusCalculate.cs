@@ -20,7 +20,7 @@ public class BonusCalculate
         Middle = 2
     }
 
-    public FigureType Figure(MatchedСells arrayOne, MatchedСells arrayTwo, Cell cell)
+    public FigureType CalculateFigure(MatchedСells arrayOne, MatchedСells arrayTwo, Cell cell)
     {
         FigureType figure = FigureType.Line;
         PositionType one = CheckPosition(arrayOne.cells, cell);
@@ -44,6 +44,7 @@ public class BonusCalculate
 
         arrayOne.figureType = figure;
         arrayTwo.figureType = figure;
+
         return figure;
     }
 

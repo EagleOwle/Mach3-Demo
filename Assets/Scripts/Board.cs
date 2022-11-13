@@ -118,7 +118,6 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
         List<Process> processes = matchedHandler.DestroyMatchItem();
         processHandler.AddProcessRange(processes);
         soundHandler.Match();
-        ClearDontDestroy();
     }
 
     private void Replacement(Cell cellOne, Cell cellTwo)
@@ -179,20 +178,20 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
                 matchedHandler.FindMatch(cells);
                 matchedHandler.FindIntersectCells();
                 EndFind();
-                matchedHandler.SetRandomColor();
+                //matchedHandler.SetRandomColor();
 
                 break;
             case GameState.DestroyMatchItem:
                 
-                eventMessage.Invoke("Cells count " + matchedHandler.matchedСells.Count);
+                //eventMessage.Invoke("Cells count " + matchedHandler.matchedСells.Count);
 
-                for (int i = 0; i < matchedHandler.matchedСells.Count; i++)
-                {
-                   // if (matchedHandler.matchedСells[i].figureType != FigureType.Line)
-                    {
-                       // eventMessage.Invoke("IntersectCells: " + matchedHandler.matchedСells[i].figureType);
-                    }
-                }
+                //for (int i = 0; i < matchedHandler.matchedСells.Count; i++)
+                //{
+                //   if (matchedHandler.matchedСells[i].figureType != FigureType.Line)
+                //    {
+                //        eventMessage.Invoke("IntersectCells: " + matchedHandler.matchedСells[i].figureType);
+                //    }
+                //}
 
                 //Invoke(nameof(DestroyMatchItem), 3);
                 DestroyMatchItem();
@@ -232,17 +231,6 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
     }
 
-    private void ClearDontDestroy()
-    {
-        for (int i = 0; i < cells.GetLength(0); i++)
-        {
-            for (int ii = 0; ii < cells.GetLength(1); ii++)
-            {
-                cells[i, ii].dontDestroy = false;
-                cells[i, ii].Message("None");
-            }
-        }
-    }
 
     
 

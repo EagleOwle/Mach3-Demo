@@ -20,27 +20,26 @@ public class MatchedСells
         return cells.Contains(cell);
     }
 
-    public bool Intersect(List<Cell> other, out List<Cell> result)
+    public bool Intersect(List<Cell> other, out Cell result)
     {
+        result = null;
+
         for (int i = 0; i < cells.Count; i++)
         {
             cells[i].Message(i.ToString());
         }
 
-        result = cells.Intersect(other).ToList();
+       List<Cell> tmpResult = cells.Intersect(other).ToList();
 
-        if(result.Count > 0)
+        if(tmpResult.Count > 0)
         {
-            foreach (var item in result)
-            {
-                item.Item.EnableOutline();
-                item.dontDestroy = true;
-            }
+            result = tmpResult[0];
 
-            if(result.Count > 1)
+            if (tmpResult.Count > 1)
             {
                 Debug.LogError("Intersect result > 1");
             }
+
             return true;
         }
         else
@@ -50,12 +49,16 @@ public class MatchedСells
 
     }
 
+    public void RemoveCell(Cell cell)
+    {
+        cells.Remove(cell);
+    }
+
     public List<Process> DestroyItem()
     {
         List<Process> processes = new List<Process>();
         foreach (var item in cells)
         {
-            if (item.dontDestroy) continue;
             item.DestroyItem(out ProcessDestroy process);
             processes.Add(process);
         }

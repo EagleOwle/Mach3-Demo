@@ -26,7 +26,9 @@ MonoBehaviour:
   prefabStore:
     prefabCell: {fileID: 1388558267831761417, guid: a2d4cad11d94d0345b0475adaca446a2,
       type: 3}
-    prefabItem: {fileID: 5793073931945732121, guid: d5dd3b0fb75e1c5438647b10b5f4ff33,
+    prefabItem: {fileID: 7980717751971251425, guid: fbaf6b6b76e889f4790b78986a6d39fc,
+      type: 3}
+    prefabBonusItem: {fileID: 73304787623241296, guid: c4c9122bf11770649a4aacbc42c5f833,
       type: 3}
   items:
   - type: 2

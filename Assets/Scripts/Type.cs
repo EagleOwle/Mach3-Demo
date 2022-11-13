@@ -6,3 +6,9 @@
     Hex,
     None
 }
+
+public enum TypeBonus
+{
+    Bonus,
+    None
+}

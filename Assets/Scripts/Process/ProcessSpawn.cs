@@ -12,9 +12,19 @@ public class ProcessSpawn : Process
         StartCoroutine(ScaleUp(EndProcess));
     }
 
+    public override void StartProcess(BoardSetting boardSetting)
+    {
+        setting = boardSetting;
+        type = ProcessType.Spawn;
+        StartCoroutine(ScaleUp(EndProcess));
+    }
+
     protected override void EndProcess()
     {
-        this.handler.EndProcess(this);
+        if (this.handler != null)
+        {
+            this.handler.EndProcess(this);
+        }
         Destroy(this);
     }
 

@@ -10,6 +10,7 @@ public class Cell : MonoBehaviour
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private Button button;
     [SerializeField] private Image image;
+    [SerializeField] private VisualEffect effect;
 
     public Type Type
     {
@@ -100,8 +101,6 @@ public class Cell : MonoBehaviour
         this.item.MoveDefault(transform);
     }
 
-    public bool dontDestroy = false;
-
     private void ClearItem()
     {
         item = null;
@@ -121,7 +120,7 @@ public class Cell : MonoBehaviour
         SetNeiborth(cells);
 
         button.onClick.AddListener(() => Selected());
-
+        effect.Initialise();
         Message(boardX + " " + boardY);
     }
 
@@ -132,6 +131,18 @@ public class Cell : MonoBehaviour
         item.Initialise(preference, Size, soundHandler);
         item.SetRandomType();
         return item;
+    }
+
+    public void SpawnBonusItem()
+    {
+        if(item != null)
+        {
+            DestroyItem(out ProcessDestroy process);
+            process.StartProcess(preference.boardSetting);
+
+        }
+
+        item = Instantiate(preference.prefabStore.prefabBonusItem, transform);
     }
 
     private void SetNeiborth(Cell[,] cells)
@@ -186,6 +197,8 @@ public class Cell : MonoBehaviour
         }
 
         process = Item.gameObject.AddComponent<ProcessDestroy>();
+        item = null;
+        effect.Show();
     }
 
     public void GetMatchNeigbor(Direction direction, List<Cell> cells)
