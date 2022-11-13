@@ -54,6 +54,14 @@ public class MatchedСells
         cells.Remove(cell);
     }
 
+    public void MoveTarget(Cell targetCell)
+    {
+        foreach (var item in cells)
+        {
+            item.Item.MoveDefault(targetCell.transform);
+        }
+    }
+
     public List<Process> DestroyItem()
     {
         List<Process> processes = new List<Process>();

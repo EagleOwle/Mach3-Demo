@@ -30,11 +30,6 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
         }
     }
 
-    public GameState CurrentState()
-    {
-        return gameState;
-    }
-
     public void Initialise()
     {
         matchedHandler = new MatchedHandler(gamePreference);
@@ -63,7 +58,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
     {
         replacement = new ReplacementHandler();
         processHandler = new ProcessHandler(this as IEndProcessListener, gamePreference.boardSetting);
-        boardCreate.Create(gamePreference, out cells, this as ISelectable, this as IGameState, out firstRow);
+        boardCreate.Create(gamePreference, soundHandler, out cells, this as ISelectable, this as IGameState, out firstRow);
         NextState = GameState.SpawnItem;
     }
 
@@ -73,7 +68,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
         {
             if (cell.Type == Type.None)
             {
-                Item item = cell.SpawnRandomType(soundHandler, out ProcessSpawn process);
+                Item item = cell.SpawnRandomType(out ProcessSpawn process);
                 processHandler.AddProcess(process);
             }
         }
@@ -125,7 +120,65 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
         replacement.Replace(cellOne, cellTwo);
     }
 
-    public void OnSelected(Cell cell, out bool isSelect)
+    private void ChangeState()
+    {
+        switch (gameState)
+        {
+            case GameState.SpawnItem:
+
+                SpawnItem();
+
+                break;
+            case GameState.FalldownItem:
+
+                FallItem();
+
+                break;
+            case GameState.FindMatchItem:
+
+                matchedHandler.FindMatch(cells);
+                matchedHandler.FindIntersectCells();
+                EndFind();
+
+                break;
+            case GameState.DestroyMatchItem:
+
+                DestroyMatchItem();
+
+                break;
+            case GameState.PlayerInput:
+                if (gamePreference.applicationSetting.replacementCell)
+                {
+                    replacement.Revert();
+                }
+                break;
+            default:
+                Debug.LogError("No State in enum");
+                break;
+        }
+
+    }
+
+    #region Interface
+    void IEndProcessListener.EndProcess(ProcessType type)
+    {
+        switch (type)
+        {
+            case ProcessType.Spawn:
+                NextState = GameState.FalldownItem;
+                break;
+            case ProcessType.Destroy:
+                NextState = GameState.FalldownItem;
+                break;
+            case ProcessType.Move:
+                break;
+            default:
+                Debug.LogError("No Type In Switch ProcessType");
+                break;
+        }
+    }
+
+    void ISelectable.OnSelected(Cell cell, out bool isSelect)
     {
         if (currentSelected == cell)
         {
@@ -159,83 +212,12 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
         }
     }
 
-    private void ChangeState()
+    GameState IGameState.CurrentState()
     {
-        switch (gameState)
-        {
-            case GameState.SpawnItem:
-
-                SpawnItem();
-
-                break;
-            case GameState.FalldownItem:
-
-                FallItem();
-
-                break;
-            case GameState.FindMatchItem:
-
-                matchedHandler.FindMatch(cells);
-                matchedHandler.FindIntersectCells();
-                EndFind();
-                //matchedHandler.SetRandomColor();
-
-                break;
-            case GameState.DestroyMatchItem:
-                
-                //eventMessage.Invoke("Cells count " + matchedHandler.matchedСells.Count);
-
-                //for (int i = 0; i < matchedHandler.matchedСells.Count; i++)
-                //{
-                //   if (matchedHandler.matchedСells[i].figureType != FigureType.Line)
-                //    {
-                //        eventMessage.Invoke("IntersectCells: " + matchedHandler.matchedСells[i].figureType);
-                //    }
-                //}
-
-                //Invoke(nameof(DestroyMatchItem), 3);
-                DestroyMatchItem();
-                
-
-                break;
-            case GameState.PlayerInput:
-                if (gamePreference.applicationSetting.replacementCell)
-                {
-                    replacement.Revert();
-                }
-                break;
-            default:
-                Debug.LogError("No State in enum");
-                break;
-        }
-
+        return gameState;
     }
 
-    public void EndProcess(ProcessType type)
-    {
-        switch (type)
-        {
-            case ProcessType.Spawn:
-                NextState = GameState.FalldownItem;
-                break;
-            case ProcessType.Destroy:
-                NextState = GameState.FalldownItem;
-                break;
-            case ProcessType.Move:
-                break;
-            default:
-                Debug.LogError("No Type In Switch ProcessType");
-                break;
-        }
-
-
-    }
-
-
-    
-
-   
-
+    #endregion
 
 
 }

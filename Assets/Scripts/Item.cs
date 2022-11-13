@@ -40,7 +40,13 @@ public class Item : MonoBehaviour
         image.sprite = prefab.sprite;
         imageBackground.sprite = prefab.backgroundSprite;
         soundHandler.Spawn();
-    } 
+    }
+
+    public void SetBonusType()
+    {
+        type = Type.Bonus;
+        soundHandler.Spawn();
+    }
 
     public void Push(float power)
     {
@@ -54,7 +60,7 @@ public class Item : MonoBehaviour
 
     private void EndMove()
     {
-        eventOnPosition.Invoke();
+        eventOnPosition?.Invoke();
         soundHandler.OnDrop();
     }
 

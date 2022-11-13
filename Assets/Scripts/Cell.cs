@@ -12,6 +12,8 @@ public class Cell : MonoBehaviour
     [SerializeField] private Image image;
     [SerializeField] private VisualEffect effect;
 
+    private SoundHandler soundHandler;
+
     public Type Type
     {
         get
@@ -89,6 +91,7 @@ public class Cell : MonoBehaviour
 
     private Item item;
     public Item Item => item;
+
     public void SetAndMoveItem(Item item)
     {
         if(this.item != null && this.item != item)
@@ -110,8 +113,9 @@ public class Cell : MonoBehaviour
     private ISelectable selectable;
     private IGameState gameState;
 
-    public void Initialise(int x, int y, GamePreference preference, Cell[,] cells, ISelectable selectable, IGameState gameState)
+    public void Initialise(int x, int y, GamePreference preference, SoundHandler soundHandler, Cell[,] cells, ISelectable selectable, IGameState gameState)
     {
+        this.soundHandler = soundHandler;
         this.selectable = selectable;
         this.preference = preference;
         this.gameState = gameState;
@@ -124,7 +128,7 @@ public class Cell : MonoBehaviour
         Message(boardX + " " + boardY);
     }
 
-    public Item SpawnRandomType(SoundHandler soundHandler, out ProcessSpawn process)
+    public Item SpawnRandomType(out ProcessSpawn process)
     {
         item = Instantiate(preference.prefabStore.prefabItem, transform);
         process = item.gameObject.AddComponent<ProcessSpawn>();
@@ -135,14 +139,16 @@ public class Cell : MonoBehaviour
 
     public void SpawnBonusItem()
     {
-        if(item != null)
+        if (item != null)
         {
-            DestroyItem(out ProcessDestroy process);
-            process.StartProcess(preference.boardSetting);
-
+            DestroyItem();
         }
 
         item = Instantiate(preference.prefabStore.prefabBonusItem, transform);
+        ProcessSpawn process = item.gameObject.AddComponent<ProcessSpawn>();
+        process.StartProcess(preference.boardSetting);
+        item.Initialise(preference, Size, soundHandler);
+        item.SetBonusType();
     }
 
     private void SetNeiborth(Cell[,] cells)
@@ -197,6 +203,19 @@ public class Cell : MonoBehaviour
         }
 
         process = Item.gameObject.AddComponent<ProcessDestroy>();
+        item = null;
+        effect.Show();
+    }
+
+    public void DestroyItem()
+    {
+        if (Item == null)
+        {
+            Debug.LogError("Item is null");
+        }
+
+        ProcessDestroy process = Item.gameObject.AddComponent<ProcessDestroy>();
+        process.StartProcess(preference.boardSetting);
         item = null;
         effect.Show();
     }

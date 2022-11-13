@@ -22,7 +22,6 @@ public class MatchedHandler
     public void FindMatch(Cell[,] cells)
     {
         matchedСells.Clear();
-
         tmpArray.Clear();
         containH.Clear();
         containV.Clear();
@@ -77,6 +76,9 @@ public class MatchedHandler
                     matchedСells[i].RemoveCell(resultIntersect);
                     matchedСells[ii].RemoveCell(resultIntersect);
 
+                    matchedСells[i].MoveTarget(resultIntersect);
+                    matchedСells[ii].MoveTarget(resultIntersect);
+
                     FigureType figure =  bonusCalculate.CalculateFigure(matchedСells[i], matchedСells[ii], resultIntersect);
                     SetBonus(figure, resultIntersect);
                 }
@@ -104,23 +106,6 @@ public class MatchedHandler
                 Debug.LogError("No Figure in Switch");
                 break;
         }
-    }
-
-    private bool ContainsCell(Cell cell, ref List<MatchedСells> matchedСells)
-    {
-        for (int i = 0; i < matchedСells.Count; i++)
-        {
-            if (matchedСells[i].ContainsCell(cell)) return true;
-        }
-
-        return false;
-    }
-
-    private bool ContainsCell(Cell cell, ref List<Cell> array)
-    {
-        if (array.Contains(cell)) return true;
-
-        return false;
     }
 
     public List<Process> DestroyMatchItem()

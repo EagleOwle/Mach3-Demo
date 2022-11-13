@@ -4,11 +4,7 @@
     Trianle,
     Romb,
     Hex,
-    None
-}
-
-public enum TypeBonus
-{
+    None,
     Bonus,
-    None
+    
 }

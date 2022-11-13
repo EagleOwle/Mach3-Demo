@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BoardCreate : MonoBehaviour
 {
-    public void Create(GamePreference gamePreference, out Cell[,] cells, ISelectable selectable, IGameState gameState, out Cell[] firstRow)
+    public void Create(GamePreference gamePreference, SoundHandler soundHandler, out Cell[,] cells, ISelectable selectable, IGameState gameState, out Cell[] firstRow)
     {
         Vector2 boardSize = new Vector2(gamePreference.boardSetting.sizeX, gamePreference.boardSetting.sizeY);
         cells = new Cell[gamePreference.boardSetting.sizeX, gamePreference.boardSetting.sizeY];
@@ -25,7 +25,7 @@ public class BoardCreate : MonoBehaviour
             }
         }
 
-        CellInitialise(gamePreference, cells, selectable, gameState);
+        CellInitialise(gamePreference, soundHandler, cells, selectable, gameState);
     }
 
     private void SetLocalPosition(Cell cell, Vector2 boardSize, int x, int y)
@@ -40,13 +40,13 @@ public class BoardCreate : MonoBehaviour
                                                    ((parentTransform.rect.size.y / boardSize.y) * y) + transform.sizeDelta.y / 2);
     }
 
-    private void CellInitialise(GamePreference gamePreference, Cell[,] cells, ISelectable selectable, IGameState gameState)
+    private void CellInitialise(GamePreference gamePreference, SoundHandler soundHandler, Cell[,] cells, ISelectable selectable, IGameState gameState)
     {
         for (int y = 0; y < gamePreference.boardSetting.sizeY; y++)
         {
             for (int x = 0; x < gamePreference.boardSetting.sizeX; x++)
             {
-                cells[x, y].Initialise(x, y, gamePreference, cells, selectable, gameState);
+                cells[x, y].Initialise(x, y, gamePreference, soundHandler, cells, selectable, gameState);
             }
         }
     }

@@ -9,7 +9,6 @@ public abstract class Process : MonoBehaviour
 
     public abstract void StartProcess(IEndProcess handler, BoardSetting boardSetting);
     public abstract void StartProcess(BoardSetting boardSetting);
-
     protected abstract void EndProcess();
 
 }
