@@ -142,6 +142,8 @@ MonoBehaviour:
   imageBackground: {fileID: 3270683476225622374}
   outline: {fileID: 4207330009089008090}
   speedSelect: 5
+  reward:
+    point: 1
   isVerified: 0
 --- !u!114 &6518004226610924993
 MonoBehaviour:

@@ -191,7 +191,6 @@ MonoBehaviour:
   Right: {fileID: 0}
   Bottom: {fileID: 0}
   Left: {fileID: 0}
-  dontDestroy: 0
 --- !u!114 &1124128200092151092
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -99,7 +99,6 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
     {
         if (matchedHandler.matchedСells.Count > 0)
         {
-            eventOnMatchCells.Invoke(matchedHandler.matchedСells.Count);
             NextState = GameState.DestroyMatchItem;
         }
         else
@@ -112,12 +111,8 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
     {
         List<Process> processes = matchedHandler.DestroyMatchItem();
         processHandler.AddProcessRange(processes);
+        eventOnMatchCells.Invoke(processes.Count);
         soundHandler.Match();
-    }
-
-    private void Replacement(Cell cellOne, Cell cellTwo)
-    {
-        replacement.Replace(cellOne, cellTwo);
     }
 
     private void ChangeState()
@@ -190,7 +185,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
         {
             if (currentSelected.IsNeighbor(cell))
             {
-                Replacement(cell, currentSelected);
+                replacement.Replace(cell, currentSelected);
                 cell.Deselected();
                 currentSelected.Deselected();
                 currentSelected = null;
