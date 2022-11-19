@@ -58,16 +58,16 @@ public class MatchedСells
     {
         foreach (var item in cells)
         {
-            item.Item.MoveDefault(targetCell.transform);
+            item.Item.SetParentAndMoveZero(targetCell);
         }
     }
 
-    public List<Process> DestroyItem()
+    public List<IProcess> DestroyItem()
     {
-        List<Process> processes = new List<Process>();
+        List<IProcess> processes = new List<IProcess>();
         foreach (var item in cells)
         {
-            item.DestroyItem(out ProcessDestroy process);
+            item.DestroyItem(out IProcess process);
             processes.Add(process);
         }
 

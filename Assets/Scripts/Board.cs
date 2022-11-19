@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using System.Collections;
 
-public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
+public class Board : MonoBehaviour, ISelectable, IEndProcessTypeListener, IGameState
 {
     public event Action<int> eventOnMatchCells;
     public event Action<String> eventMessage;
@@ -17,7 +17,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
     private Cell currentSelected;
     private ReplacementHandler replacement;
-    private ProcessHandler processHandler;
+    private ProcessController processHandler;
     private MatchedHandler matchedHandler;
 
     private GameState gameState;
@@ -57,7 +57,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
     public void StartMatch()
     {
         replacement = new ReplacementHandler();
-        processHandler = new ProcessHandler(this as IEndProcessListener, gamePreference.boardSetting);
+        processHandler = new ProcessController(this as IEndProcessTypeListener, gamePreference.boardSetting);
         boardCreate.Create(gamePreference, soundHandler, out cells, this as ISelectable, this as IGameState, out firstRow);
         NextState = GameState.SpawnItem;
     }
@@ -68,7 +68,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
         {
             if (cell.Type == Type.None)
             {
-                Item item = cell.SpawnRandomType(out ProcessSpawn process);
+                Item item = cell.SpawnRandomType(out IProcess process);
                 processHandler.AddProcess(process);
             }
         }
@@ -109,7 +109,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
 
     private void DestroyMatchItem()
     {
-        List<Process> processes = matchedHandler.DestroyMatchItem();
+        List<IProcess> processes = matchedHandler.DestroyMatchItem();
         processHandler.AddProcessRange(processes);
         eventOnMatchCells.Invoke(processes.Count);
         soundHandler.Match();
@@ -155,7 +155,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessListener, IGameState
     }
 
     #region Interface
-    void IEndProcessListener.EndProcess(ProcessType type)
+    void IEndProcessTypeListener.EndProcessType(ProcessType type)
     {
         switch (type)
         {

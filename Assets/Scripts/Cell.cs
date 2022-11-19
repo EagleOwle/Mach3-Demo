@@ -10,7 +10,6 @@ public class Cell : MonoBehaviour
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private Button button;
     [SerializeField] private Image image;
-    [SerializeField] private VisualEffect effect;
 
     private SoundHandler soundHandler;
 
@@ -83,11 +82,14 @@ public class Cell : MonoBehaviour
         return false;
     }
 
-    [Header("Neiborth")]
-    public Cell Top;
-    public Cell Right;
-    public Cell Bottom;
-    public Cell Left;
+    private Cell top;
+    private Cell right;
+    private Cell bottom;
+    private Cell left;
+    public Cell Top => top;
+    public Cell Right => right;
+    public Cell Bottom => bottom;
+    public Cell Left => left;
 
     private Item item;
     public Item Item => item;
@@ -101,7 +103,7 @@ public class Cell : MonoBehaviour
 
         this.item = item;
         this.item.eventOnPosition += ItemOnPosition;
-        this.item.MoveDefault(transform);
+        this.item.SetParentAndMoveZero(this);
     }
 
     private void ClearItem()
@@ -124,16 +126,19 @@ public class Cell : MonoBehaviour
         SetNeiborth(cells);
 
         button.onClick.AddListener(() => Selected());
-        effect.Initialise();
         Message(boardX + " " + boardY);
     }
 
-    public Item SpawnRandomType(out ProcessSpawn process)
+    public Item SpawnRandomType(out IProcess process)
     {
         item = Instantiate(preference.prefabStore.prefabItem, transform);
-        process = item.gameObject.AddComponent<ProcessSpawn>();
         item.Initialise(preference, Size, soundHandler);
         item.SetRandomType();
+
+        ProcessSpawn processSpawn = item.gameObject.AddComponent<ProcessSpawn>();
+        processSpawn.StartProcess(preference.boardSetting);
+        process = processSpawn as IProcess;
+
         return item;
     }
 
@@ -145,18 +150,23 @@ public class Cell : MonoBehaviour
         }
 
         item = Instantiate(preference.prefabStore.prefabBonusItem, transform);
-        ProcessSpawn process = item.gameObject.AddComponent<ProcessSpawn>();
-        process.StartProcess(preference.boardSetting);
         item.Initialise(preference, Size, soundHandler);
         item.SetBonusType();
+        
+        ProcessSpawn process = item.gameObject.AddComponent<ProcessSpawn>();
+        process.StartProcess(preference.boardSetting);
+
+        //var bonus = Instantiate(preference.prefabStore.lightingBolt, transform);
+        //bonus.Initialise(this, Direction.Right, preference.boardSetting);
+
     }
 
     private void SetNeiborth(Cell[,] cells)
     {
-        Left = boardX > 0 ? cells[boardX - 1, boardY] : null;
-        Bottom = boardY > 0 ? cells[boardX, boardY - 1] : null;
-        Right = boardX < cells.GetLength(0) - 1 ? cells[boardX + 1, boardY] : null;
-        Top = boardY < cells.GetLength(1) - 1 ? cells[boardX, boardY + 1] : null;
+        left = boardX > 0 ? cells[boardX - 1, boardY] : null;
+        bottom = boardY > 0 ? cells[boardX, boardY - 1] : null;
+        right = boardX < cells.GetLength(0) - 1 ? cells[boardX + 1, boardY] : null;
+        top = boardY < cells.GetLength(1) - 1 ? cells[boardX, boardY + 1] : null;
     }
 
     public void FallingDown()
@@ -195,7 +205,28 @@ public class Cell : MonoBehaviour
         return bottom;
     }
 
-    public void DestroyItem(out ProcessDestroy process)
+    private void DestroyItem(EffectType effectType = EffectType.None)
+    {
+        DestroyItem(out ProcessDestroy process, effectType);
+        process.StartProcess(preference.boardSetting);
+    }
+
+    public void DestroyItem(out IProcess process, EffectType effectType = EffectType.None)
+    {
+        if (Item == null)
+        {
+            Debug.LogError("Item is null");
+        }
+
+        ProcessDestroy processDestroy = Item.gameObject.AddComponent<ProcessDestroy>();
+        processDestroy.StartProcess(preference.boardSetting);
+
+        process = processDestroy as IProcess;
+
+        item = null;
+    }
+
+    public void DestroyItem(out ProcessDestroy process, EffectType effectType = EffectType.None)
     {
         if (Item == null)
         {
@@ -203,21 +234,8 @@ public class Cell : MonoBehaviour
         }
 
         process = Item.gameObject.AddComponent<ProcessDestroy>();
+        //item.Destroy();
         item = null;
-        effect.Show();
-    }
-
-    public void DestroyItem()
-    {
-        if (Item == null)
-        {
-            Debug.LogError("Item is null");
-        }
-
-        ProcessDestroy process = Item.gameObject.AddComponent<ProcessDestroy>();
-        process.StartProcess(preference.boardSetting);
-        item = null;
-        effect.Show();
     }
 
     public void GetMatchNeigbor(Direction direction, List<Cell> cells)

@@ -1,5 +1,5 @@
-﻿public interface IEndProcessListener
-    {
-        public void EndProcess(ProcessType type);
-    }
-
+﻿
+public interface IEndProcessListener
+{
+    void EndProcess(IProcess value);
+}

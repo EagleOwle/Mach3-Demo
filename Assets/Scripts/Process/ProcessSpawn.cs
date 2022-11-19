@@ -2,30 +2,13 @@
 using System.Collections;
 using UnityEngine;
 
-public class ProcessSpawn : Process
+public class ProcessSpawn : Process, IProcess
 {
-    public override void StartProcess(IEndProcess handler, BoardSetting boardSetting)
+    public void StartProcess(BoardSetting boardSetting)
     {
-        this.handler = handler;
-        setting = boardSetting;
+        this.boardSetting = boardSetting;
         type = ProcessType.Spawn;
         StartCoroutine(ScaleUp(EndProcess));
-    }
-
-    public override void StartProcess(BoardSetting boardSetting)
-    {
-        setting = boardSetting;
-        type = ProcessType.Spawn;
-        StartCoroutine(ScaleUp(EndProcess));
-    }
-
-    protected override void EndProcess()
-    {
-        if (this.handler != null)
-        {
-            this.handler.EndProcess(this);
-        }
-        Destroy(this);
     }
 
     private IEnumerator ScaleUp(Action endScale)
@@ -33,14 +16,12 @@ public class ProcessSpawn : Process
         float current = 0;
         while (current < 1)
         {
-            current = Mathf.MoveTowards(current, 1, Time.deltaTime * setting.durationScale);
+            current = Mathf.MoveTowards(current, 1, Time.deltaTime * boardSetting.durationScale);
             transform.localScale = Vector3.one * current;
             yield return null;
         }
 
         EndProcess();
     }
-
-
 }
 

@@ -1,15 +1,33 @@
 ﻿using UnityEngine;
 
-public abstract class Process : MonoBehaviour
+public interface IProcess
 {
-    protected BoardSetting setting;
-    protected IEndProcess handler;
+    void AddListener(IEndProcessListener endProcessListener);
+    ProcessType Type();
+}
+
+public abstract class Process : MonoBehaviour, IProcess
+{
+    protected BoardSetting boardSetting;
+    protected IEndProcessListener endProcessListener;
     protected ProcessType type;
-    public ProcessType ProcessType => type;
 
-    public abstract void StartProcess(IEndProcess handler, BoardSetting boardSetting);
-    public abstract void StartProcess(BoardSetting boardSetting);
-    protected abstract void EndProcess();
+    public void AddListener(IEndProcessListener endProcessListener)
+    {
+        this.endProcessListener = endProcessListener;
+    }
 
+    public ProcessType Type()
+    {
+        return type;
+    }
+
+    protected virtual void EndProcess()
+    {
+        if (this.endProcessListener != null)
+        {
+            this.endProcessListener.EndProcess(this);
+        }
+    }
 }
 

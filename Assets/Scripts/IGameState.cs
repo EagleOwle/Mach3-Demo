@@ -1,5 +1,5 @@
 ﻿public interface IGameState
     {
-        public GameState CurrentState();
+        GameState CurrentState();
     }
 

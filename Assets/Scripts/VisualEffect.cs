@@ -5,7 +5,7 @@ using Coffee.UIExtensions;
 public class VisualEffect : MonoBehaviour
 {
     [SerializeField] UIParticle effect;
-
+    
     public void Initialise()
     {
         Hide();

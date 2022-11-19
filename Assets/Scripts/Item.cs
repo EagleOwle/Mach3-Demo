@@ -21,13 +21,15 @@ public class Item : MonoBehaviour
 
     private GamePreference preference;
     private SoundHandler soundHandler;
+    private EffectHandler effectHandler;
 
     public void Initialise(GamePreference preference, Vector2 size, SoundHandler soundHandler)
     {
+        effectHandler = new EffectHandler();
         this.preference = preference;
         this.soundHandler = soundHandler;
         motion.eventEndMove += EndMove;
-        motion.Initialise(preference.boardSetting);
+        motion.Initialise(preference.boardSetting.durationMove);
         type = Type.None;
         outline.enabled = false;
     }
@@ -53,9 +55,10 @@ public class Item : MonoBehaviour
         motion.Push(power);
     }
 
-    public void MoveDefault(Transform parent)
+    public void SetParentAndMoveZero(Cell parent)
     {
-        motion.MoveDefault(parent);
+        transform.SetParent(parent.transform);
+        motion.MoveZeroPosition();
     }
 
     private void EndMove()
@@ -86,7 +89,7 @@ public class Item : MonoBehaviour
 
     public void Deselected()
     {
-        //outline.enabled = false;
+        outline.enabled = false;
     }
 
     public void SetColor(Color color)

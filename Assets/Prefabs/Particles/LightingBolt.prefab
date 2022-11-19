@@ -4834,7 +4834,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b41c12b9e8d21c442affcda9d5c050f7, type: 2}
+  - {fileID: 2100000, guid: b21cfba01f2dc29499e0fdae9da37e70, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5012,8 +5012,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4014535760500385953}
   - component: {fileID: 1867785299288660683}
-  - component: {fileID: 8396448740658691317}
   - component: {fileID: 8445932702565117220}
+  - component: {fileID: -8474862525561557775}
+  - component: {fileID: 8308512486036815936}
   m_Layer: 0
   m_Name: LightingBolt
   m_TagString: Untagged
@@ -5050,19 +5051,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6085208834134778360}
   m_CullTransparentMesh: 1
---- !u!114 &8396448740658691317
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6085208834134778360}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0870e3fdb4da56a4794b5ec3ef4afb3b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  effect: {fileID: 8445932702565117220}
 --- !u!114 &8445932702565117220
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5084,7 +5072,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsTrail: 0
-  m_Scale3D: {x: 40, y: 40, z: 40}
+  m_Scale3D: {x: 80, y: 80, z: 80}
   m_AnimatableProperties: []
   m_Particles:
   - {fileID: 1842105961879502010}
@@ -5094,6 +5082,32 @@ MonoBehaviour:
   m_GroupId: 0
   m_GroupMaxId: 0
   m_AbsoluteMode: 0
+--- !u!114 &-8474862525561557775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6085208834134778360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f2c76723a8c16c49be54b39b74e4351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveDenominator: 4
+  motion: {fileID: 8308512486036815936}
+--- !u!114 &8308512486036815936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6085208834134778360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f87fabdaa3b80848bec62eeea9e5685, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7078450431438037561
 GameObject:
   m_ObjectHideFlags: 0
@@ -9925,7 +9939,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 59b66e1956031654985c136e6927a7d8, type: 2}
+  - {fileID: 2100000, guid: 7eb6f2b09fd91614d81c192b7bb9e1a5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -14758,7 +14772,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0aed4f47f3bcce64b83be8b64904bab4, type: 2}
+  - {fileID: 2100000, guid: f8e93f35e7751454f96ed0af842ee0f7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

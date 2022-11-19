@@ -108,9 +108,9 @@ public class MatchedHandler
         }
     }
 
-    public List<Process> DestroyMatchItem()
+    public List<IProcess> DestroyMatchItem()
     {
-        List<Process> processes = new List<Process>();
+        List<IProcess> processes = new List<IProcess>();
         for (int i = 0; i < matchedСells.Count; i++)
         {
             processes.AddRange(matchedСells[i].DestroyItem());
