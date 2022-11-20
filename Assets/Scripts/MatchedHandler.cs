@@ -13,13 +13,33 @@ public class MatchedHandler
 
     private GamePreference gamePreference;
     private BonusCalculate bonusCalculate;
-    public List<MatchedСells> matchedСells;
+    private List<MatchedСells> matchedСells;
+    public bool MatchedCellsEmpty
+    {
+        get
+        {
+            if (matchedСells.Count <= 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
 
     List<Cell> containH = new List<Cell>();
     List<Cell> containV = new List<Cell>();
     List<Cell> tmpArray = new List<Cell>();
 
-    public void FindMatch(Cell[,] cells)
+    public void StartFindMatchCells(Cell[,] cells)
+    {
+        FindMatch(cells);
+        FindIntersectCells(matchedСells);
+    }
+
+    private void FindMatch(Cell[,] cells)
     {
         matchedСells.Clear();
         tmpArray.Clear();
@@ -63,7 +83,7 @@ public class MatchedHandler
         return false;
     }
 
-    public void FindIntersectCells()
+    private void FindIntersectCells(List<MatchedСells> matchedСells)
     {
         for (int i = 0; i < matchedСells.Count; i++)
         {
@@ -76,8 +96,8 @@ public class MatchedHandler
                     matchedСells[i].RemoveCell(resultIntersect);
                     matchedСells[ii].RemoveCell(resultIntersect);
 
-                    matchedСells[i].MoveTarget(resultIntersect);
-                    matchedСells[ii].MoveTarget(resultIntersect);
+                    matchedСells[i].MoveAllCellsToTarget(resultIntersect);
+                    matchedСells[ii].MoveAllCellsToTarget(resultIntersect);
 
                     FigureType figure =  bonusCalculate.CalculateFigure(matchedСells[i], matchedСells[ii], resultIntersect);
                     SetBonus(figure, resultIntersect);

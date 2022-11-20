@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: GamePreference
   m_EditorClassIdentifier: 
   boardSetting:
-    durationScale: 3
-    durationMove: 2
+    durationScale: 1
+    durationMove: 1
     minMatchCount: 3
     sizeX: 7
     sizeY: 10
@@ -32,6 +32,7 @@ MonoBehaviour:
       type: 3}
     lightingBolt: {fileID: -8474862525561557775, guid: f26b66b1f39300a46b9e162eec567587,
       type: 3}
+    hitElectric: {fileID: 0}
   items:
   - type: 2
     sprite: {fileID: 21300000, guid: 3d7226a7f092a3a469cca7f4a0dd55e2, type: 3}

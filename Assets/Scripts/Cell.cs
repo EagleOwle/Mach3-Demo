@@ -234,7 +234,6 @@ public class Cell : MonoBehaviour
         }
 
         process = Item.gameObject.AddComponent<ProcessDestroy>();
-        //item.Destroy();
         item = null;
     }
 

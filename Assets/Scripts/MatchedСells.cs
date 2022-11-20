@@ -54,7 +54,7 @@ public class MatchedСells
         cells.Remove(cell);
     }
 
-    public void MoveTarget(Cell targetCell)
+    public void MoveAllCellsToTarget(Cell targetCell)
     {
         foreach (var item in cells)
         {

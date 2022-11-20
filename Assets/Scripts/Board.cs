@@ -95,15 +95,15 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessTypeListener, IGameS
 
     }
 
-    private void EndFind()
+    private void EndFind(bool endFind)
     {
-        if (matchedHandler.matchedСells.Count > 0)
+        if (endFind)
         {
-            NextState = GameState.DestroyMatchItem;
+            NextState = GameState.PlayerInput;
         }
         else
         {
-            NextState = GameState.PlayerInput;
+            NextState = GameState.DestroyMatchItem;
         }
     }
 
@@ -131,9 +131,8 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessTypeListener, IGameS
                 break;
             case GameState.FindMatchItem:
 
-                matchedHandler.FindMatch(cells);
-                matchedHandler.FindIntersectCells();
-                EndFind();
+                matchedHandler.StartFindMatchCells(cells);
+                EndFind(matchedHandler.MatchedCellsEmpty);
 
                 break;
             case GameState.DestroyMatchItem:
