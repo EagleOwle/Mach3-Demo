@@ -186,11 +186,6 @@ MonoBehaviour:
   text: {fileID: 835785290836756877}
   button: {fileID: 1124128200092151092}
   image: {fileID: 5164476657705615829}
-  effect: {fileID: 4833328450741222727}
-  Top: {fileID: 0}
-  Right: {fileID: 0}
-  Bottom: {fileID: 0}
-  Left: {fileID: 0}
 --- !u!114 &1124128200092151092
 MonoBehaviour:
   m_ObjectHideFlags: 0

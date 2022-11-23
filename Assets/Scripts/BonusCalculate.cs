@@ -42,9 +42,6 @@ public class BonusCalculate
             figure = FigureType.Cross;
         }
 
-        arrayOne.figureType = figure;
-        arrayTwo.figureType = figure;
-
         return figure;
     }
 

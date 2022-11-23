@@ -138,6 +138,7 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessTypeListener, IGameS
             case GameState.DestroyMatchItem:
 
                 DestroyMatchItem();
+                //Invoke(nameof(Break), 0.1f);
 
                 break;
             case GameState.PlayerInput:
@@ -213,6 +214,10 @@ public class Board : MonoBehaviour, ISelectable, IEndProcessTypeListener, IGameS
 
     #endregion
 
-
+    private void Break()
+    {
+        Debug.Log("Break");
+        Debug.Break();
+    }
 }
 

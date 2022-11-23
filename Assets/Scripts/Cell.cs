@@ -94,6 +94,9 @@ public class Cell : MonoBehaviour
     private Item item;
     public Item Item => item;
 
+    private bool replaced = false;
+    public bool Replaced => replaced;
+
     public void SetAndMoveItem(Item item)
     {
         if(this.item != null && this.item != item)
@@ -104,6 +107,13 @@ public class Cell : MonoBehaviour
         this.item = item;
         this.item.eventOnPosition += ItemOnPosition;
         this.item.SetParentAndMoveZero(this);
+    }
+
+    public void Replace(Item item)
+    {
+        replaced = !replaced;
+        Message(replaced.ToString());
+        SetAndMoveItem(item);
     }
 
     private void ClearItem()
@@ -171,6 +181,8 @@ public class Cell : MonoBehaviour
 
     public void FallingDown()
     {
+        replaced = false;
+
         if (Item == null) return;
 
         Cell bottomEmptyCell = FindTheLatestBelow(Bottom);

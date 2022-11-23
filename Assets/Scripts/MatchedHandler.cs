@@ -7,12 +7,12 @@ public class MatchedHandler
     public MatchedHandler(GamePreference gamePreference)
     {
         this.gamePreference = gamePreference;
-        bonusCalculate = new BonusCalculate();
+        //bonusCalculate = new BonusCalculate();
         matchedСells = new List<MatchedСells>();
     }
 
     private GamePreference gamePreference;
-    private BonusCalculate bonusCalculate;
+    //private BonusCalculate bonusCalculate;
     private List<MatchedСells> matchedСells;
     public bool MatchedCellsEmpty
     {
@@ -44,7 +44,7 @@ public class MatchedHandler
         matchedСells.Clear();
         tmpArray.Clear();
         containH.Clear();
-        containV.Clear();
+        containV.Clear();     
 
         for (int y = 0; y < cells.GetLength(1); y++)
         {
@@ -85,51 +85,29 @@ public class MatchedHandler
 
     private void FindIntersectCells(List<MatchedСells> matchedСells)
     {
-        for (int i = 0; i < matchedСells.Count; i++)
+        for (int one = 0; one < matchedСells.Count; one++)
         {
-            for (int ii = 0; ii < matchedСells.Count; ii++)
+            for (int two = 0; two < matchedСells.Count; two++)
             {
-                if (i == ii) continue;
+                if (one == two) continue;
 
-                if (matchedСells[i].Intersect(matchedСells[ii].cells, out Cell resultIntersect))
+                if (matchedСells[one].Intersect(matchedСells[two].cells, out Cell resultIntersect))
                 {
-                    matchedСells[i].RemoveCell(resultIntersect);
-                    matchedСells[ii].RemoveCell(resultIntersect);
+                    BonusCell bonus = new BonusCell(resultIntersect, (BonusType)matchedСells[one].Count + matchedСells[two].Count);
 
-                    matchedСells[i].MoveAllCellsToTarget(resultIntersect);
-                    matchedСells[ii].MoveAllCellsToTarget(resultIntersect);
+                    matchedСells[one].RemoveCell(resultIntersect);
+                    matchedСells[two].RemoveCell(resultIntersect);
 
-                    FigureType figure =  bonusCalculate.CalculateFigure(matchedСells[i], matchedСells[ii], resultIntersect);
-                    SetBonus(figure, resultIntersect);
+                    matchedСells[one].BonusCell = bonus;
+                    matchedСells[two].BonusCell = bonus;
                 }
             }
         }
     }
 
-    private void SetBonus(FigureType figure, Cell targetCell)
-    {
-        switch (figure)
-        {
-            case FigureType.Line:
-                break;
-            case FigureType.Angle:
-                targetCell.SpawnBonusItem();
-                break;
-            case FigureType.T:
-                targetCell.SpawnBonusItem();
-                break;
-            case FigureType.Cross:
-                targetCell.SpawnBonusItem();
-                break;
-
-            default:
-                Debug.LogError("No Figure in Switch");
-                break;
-        }
-    }
-
     public List<IProcess> DestroyMatchItem()
     {
+        SetRandomColor();
         List<IProcess> processes = new List<IProcess>();
         for (int i = 0; i < matchedСells.Count; i++)
         {
