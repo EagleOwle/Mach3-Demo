@@ -54,7 +54,7 @@ public class MatchedHandler
                 {
                     if (FindMatchCellInDirection(Direction.Top, cells[x, y], out tmpArray))
                     {
-                        matchedСells.Add(new MatchedСells(tmpArray, FigureType.Line, Direction.Top));
+                        matchedСells.Add(new MatchedСells(tmpArray));
                         containV.AddRange(tmpArray);
                     }
                 }
@@ -63,7 +63,7 @@ public class MatchedHandler
                 {
                     if (FindMatchCellInDirection(Direction.Right, cells[x, y], out tmpArray))
                     {
-                        matchedСells.Add(new MatchedСells(tmpArray, FigureType.Line, Direction.Right));
+                        matchedСells.Add(new MatchedСells(tmpArray));
                         containH.AddRange(tmpArray);
                     }
                 }
@@ -91,17 +91,9 @@ public class MatchedHandler
             {
                 if (one == two) continue;
 
-                if (matchedСells[one].Intersect(matchedСells[two].cells, out Cell resultIntersect))
+                if (matchedСells[one].Intersect(matchedСells[two].cells))
                 {
-                    var cells = matchedСells[one].cells.Union(matchedСells[two].cells);
-
-                    matchedСells[one].cells = cells.ToList();
-
-                    BonusCell bonus = new BonusCell(resultIntersect, (BonusType)matchedСells[one].Count);
-                    matchedСells[one].BonusCell = bonus;
-
                     matchedСells.Remove(matchedСells[two]);
-
                 }
             }
         }

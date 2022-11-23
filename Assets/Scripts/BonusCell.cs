@@ -8,4 +8,9 @@
         this.cell = cell;
         this.bonusType = bonusType;
     }
+
+    public void Implement()
+    {
+        cell.SpawnBonusItem();
+    }
 }

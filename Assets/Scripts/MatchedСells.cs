@@ -4,15 +4,15 @@ using System.Linq;
 
 public class MatchedСells
 {
-    public MatchedСells(List<Cell> cells, FigureType figureType, Direction direction)
+    public MatchedСells(List<Cell> cells)//, FigureType figureType, Direction direction)
     {
         this.cells = cells;
-        this.figureType = figureType;
-        this.direction = direction;
+       // this.figureType = figureType;
+       // this.direction = direction;
     }
 
-    public Direction direction;
-    public FigureType figureType;
+    //public Direction direction;
+    //public FigureType figureType;
     public List<Cell> cells;
     public int Count => cells.Count;
 
@@ -30,25 +30,21 @@ public class MatchedСells
         return cells.Contains(cell);
     }
 
-    public bool Intersect(List<Cell> other, out Cell result)
+    public bool Intersect(List<Cell> other)
     {
-        result = null;
-
-        for (int i = 0; i < cells.Count; i++)
-        {
-            cells[i].Message(i.ToString());
-        }
-
-       List<Cell> tmpResult = cells.Intersect(other).ToList();
+        List<Cell> tmpResult = cells.Intersect(other).ToList();
 
         if(tmpResult.Count > 0)
         {
-            result = tmpResult[0];
+           Cell result = tmpResult[0];
 
             if (tmpResult.Count > 1)
             {
                 Debug.LogError("Intersect result > 1");
             }
+
+            cells = cells.Union(other).ToList();
+            CreateBonus(result, cells.Count);
 
             return true;
         }
@@ -59,49 +55,54 @@ public class MatchedСells
 
     }
 
+    private void CreateBonus(Cell targetCell, int arrayCount)
+    {
+        bonusCell = new BonusCell(targetCell, (BonusType)arrayCount);
+    }
+
     public void RemoveCell(Cell cell)
     {
         cells.Remove(cell);
     }
 
+    private void BonusCalculate()
+    {
+        if (bonusCell == null)
+        {
+            if (cells.Count >= (int)BonusType.One)
+            {
+                if (SearchReplacmentCell(out Cell replacedCell))
+                {
+                    CreateBonus(replacedCell, cells.Count);
+                }
+                else
+                {
+                    CreateBonus(cells[1], cells.Count);
+                }
+            }
+        }
+    }
+
     public List<IProcess> DestroyItem()
     {
-        //if (bonusCell != null)
-        //{
-        //    Debug.Log(bonusCell.bonusType.ToString());
-        //    Debug.Break();
-        //}
+        BonusCalculate();
 
         List<IProcess> processes = new List<IProcess>();
         foreach (var item in cells)
         {
-            if (bonusCell == null)
-            {
-                if (cells.Count >= (int)BonusType.One)
-                {
-                    if (SearchReplacmentCell(out Cell replacedCell))
-                    {
-                        bonusCell = new BonusCell(replacedCell, (BonusType)cells.Count);
-                        //item.Item.SetParentAndMoveZero(replacedCell);
-                    }
-                    else
-                    {
-                        bonusCell = new BonusCell(cells[1], (BonusType)cells.Count);
-                        //item.Item.SetParentAndMoveZero(cells[1]);
-                    }
-                }
-            }
-
             if (bonusCell != null)
             {
                 item.Item.SetParentAndMoveZero(bonusCell.cell);
-                bonusCell.cell.SpawnBonusItem();
+                
             }
 
             item.DestroyItem(out IProcess process);
             processes.Add(process);
+        }
 
-            
+        if (bonusCell != null)
+        {
+            bonusCell.Implement();
         }
 
         return processes;
