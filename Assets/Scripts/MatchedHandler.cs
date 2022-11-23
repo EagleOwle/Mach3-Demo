@@ -101,7 +101,7 @@ public class MatchedHandler
 
     public List<IProcess> DestroyMatchItem()
     {
-        SetRandomColor();
+       // SetRandomColor();
         List<IProcess> processes = new List<IProcess>();
         for (int i = 0; i < matchedСells.Count; i++)
         {
