@@ -93,13 +93,15 @@ public class MatchedHandler
 
                 if (matchedСells[one].Intersect(matchedСells[two].cells, out Cell resultIntersect))
                 {
-                    BonusCell bonus = new BonusCell(resultIntersect, (BonusType)matchedСells[one].Count + matchedСells[two].Count);
+                    var cells = matchedСells[one].cells.Union(matchedСells[two].cells);
 
-                    matchedСells[one].RemoveCell(resultIntersect);
-                    matchedСells[two].RemoveCell(resultIntersect);
+                    matchedСells[one].cells = cells.ToList();
 
+                    BonusCell bonus = new BonusCell(resultIntersect, (BonusType)matchedСells[one].Count);
                     matchedСells[one].BonusCell = bonus;
-                    matchedСells[two].BonusCell = bonus;
+
+                    matchedСells.Remove(matchedСells[two]);
+
                 }
             }
         }

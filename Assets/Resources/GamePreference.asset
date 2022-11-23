@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: GamePreference
   m_EditorClassIdentifier: 
   boardSetting:
-    durationScale: 1
-    durationMove: 1
+    durationScale: 2
+    durationMove: 2
     minMatchCount: 3
     sizeX: 7
     sizeY: 10
@@ -22,7 +22,7 @@ MonoBehaviour:
     boardOffsetY: 100
   applicationSetting:
     showDebug: 1
-    replacementCell: 0
+    replacementCell: 1
   prefabStore:
     prefabCell: {fileID: 1388558267831761417, guid: a2d4cad11d94d0345b0475adaca446a2,
       type: 3}

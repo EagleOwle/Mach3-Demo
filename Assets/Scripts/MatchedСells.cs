@@ -66,25 +66,36 @@ public class MatchedСells
 
     public List<IProcess> DestroyItem()
     {
-        if (bonusCell != null)
-        {
-            Debug.Log(bonusCell.bonusType.ToString());
-            Debug.Break();
-        }
+        //if (bonusCell != null)
+        //{
+        //    Debug.Log(bonusCell.bonusType.ToString());
+        //    Debug.Break();
+        //}
 
         List<IProcess> processes = new List<IProcess>();
         foreach (var item in cells)
         {
+            if (bonusCell == null)
+            {
+                if (cells.Count >= (int)BonusType.One)
+                {
+                    if (SearchReplacmentCell(out Cell replacedCell))
+                    {
+                        bonusCell = new BonusCell(replacedCell, (BonusType)cells.Count);
+                        //item.Item.SetParentAndMoveZero(replacedCell);
+                    }
+                    else
+                    {
+                        bonusCell = new BonusCell(cells[1], (BonusType)cells.Count);
+                        //item.Item.SetParentAndMoveZero(cells[1]);
+                    }
+                }
+            }
+
             if (bonusCell != null)
             {
                 item.Item.SetParentAndMoveZero(bonusCell.cell);
-            }
-            else
-            {
-                //if(SearchReplacmentCell(out Cell replacedCell))
-                //{
-                //    item.Item.SetParentAndMoveZero(replacedCell);
-                //}
+                bonusCell.cell.SpawnBonusItem();
             }
 
             item.DestroyItem(out IProcess process);
